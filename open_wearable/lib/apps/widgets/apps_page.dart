@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
+import 'package:open_wearable/apps/allergy_symptom_tracker/view/study_selection.dart';
 import 'package:open_wearable/apps/heart_tracker/widgets/heart_tracker_page.dart';
 import 'package:open_wearable/apps/posture_tracker/model/earable_attitude_tracker.dart';
 import 'package:open_wearable/apps/posture_tracker/view/posture_tracker_view.dart';
@@ -63,6 +64,14 @@ List<AppInfo> _apps = [
         );
       },
     ),
+  ),
+  AppInfo(
+    logoPath: "lib/apps/allergy_symptom_tracker/assets/logo.png",
+    title: "Allergy Symptom Tracker",
+    description: "Measure different kind of reactions to allergy symptoms",
+    widget: SelectEarableView(startApp: (wearable, sensorConfigProvider) {
+      return StudySelection();
+    },),
   ),
 ];
 
