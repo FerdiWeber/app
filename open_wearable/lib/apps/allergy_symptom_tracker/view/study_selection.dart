@@ -1,5 +1,7 @@
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.dart';
+import 'study_runner.dart';
 
 class StudySelection extends StatefulWidget {
   const StudySelection({super.key});
@@ -94,37 +96,35 @@ class _StudySelectionState extends State<StudySelection> {
 
               // Start-Button
               PlatformElevatedButton(
-                onPressed: (_selectedOption == null ||
-                        _measurementController.text.isEmpty)
-                    ? null
-                    : () {
-                        showPlatformDialog(
+              onPressed: (_selectedOption == null ||
+                      _measurementController.text.isEmpty)
+                  ? null
+                  : () {
+                      late final StudyProtocol selectedProtocol;
+                      if (_selectedOption == "option1") {
+                        selectedProtocol = Dataset1Protocol();
+                      } else {
+                        selectedProtocol = Dataset2Protocol();
+                      }
+
+                      Navigator.push(
+                        context,
+                        platformPageRoute(
                           context: context,
-                          builder: (_) => PlatformAlertDialog(
-                            title: const Text("Gestartet!"),
-                            content: Text(
-                              "Du hast gewählt: $_selectedOption\n"
-                              "Measurement ID: ${_measurementController.text}",
-                            ),
-                            actions: <Widget>[
-                              PlatformDialogAction(
-                                child: const Text('OK'),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      material: (_, __) => MaterialElevatedButtonData(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: (_selectedOption != null &&
-                                  _measurementController.text.isNotEmpty)
-                              ? Colors.green
-                              : Colors.grey,
+                          builder: (_) => StudyRunner(protocol: selectedProtocol),
                         ),
-                      ),
-                child: const Text("Start"),
+                      );
+                    },
+              material: (_, __) => MaterialElevatedButtonData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: (_selectedOption != null &&
+                          _measurementController.text.isNotEmpty)
+                      ? Colors.green
+                      : Colors.grey,
+                ),
               ),
+              child: const Text("Start"),
+            ),
             ],
           ),
         ),
