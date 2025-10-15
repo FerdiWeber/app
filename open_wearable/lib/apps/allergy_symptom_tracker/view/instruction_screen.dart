@@ -8,18 +8,27 @@ class InstructionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24),
+  return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Center( // <--- das sorgt für echte vertikale Zentrierung
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min, // verhindert Streckung
           children: [
-            Text(text, textAlign: TextAlign.center, style: const TextStyle(fontSize: 20)),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 20),
+            ),
             const SizedBox(height: 30),
-            ElevatedButton(onPressed: onNext, child: const Text("Weiter")),
+            ElevatedButton(
+              onPressed: onNext,
+              child: const Text("Weiter"),
+            ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

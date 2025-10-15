@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_step.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/view/instruction_screen.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/view/measuring_screen.dart';
+import 'package:open_wearable/apps/allergy_symptom_tracker/view/study_selection.dart';
 
 class StudyRunner extends StatefulWidget {
   final StudyProtocol protocol;
@@ -34,7 +36,12 @@ class _StudyRunnerState extends State<StudyRunner> {
           content: const Text("Danke für die Teilnahme!"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.push(
+                context,
+                platformPageRoute(context: context, 
+                builder: (_) => StudySelection(),
+                ),
+              ),
               child: const Text("OK"),
             )
           ],

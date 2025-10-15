@@ -39,4 +39,7 @@
 
     <!-- internet persmission, for fetching firmware update -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- camera permission to use front camera -->
+    <uses-permission android:name="android.permission.CAMERA"/>
 </manifest>
