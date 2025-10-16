@@ -7,11 +7,11 @@ abstract class StudyProtocol {
 class Dataset1Protocol extends StudyProtocol {
   @override
   List<StudyStep> getSteps() => [
-    StudyStep(type: StudyStepType.instruction, description: "Erste Task Set 1"),
+    StudyStep(type: StudyStepType.instruction, heading: "Schlucken", description: "Schlucke während der Aufzeichnung so oft wie möglich. Betätige dabei bei bei jedem Schlucken den Action Button"),
+    StudyStep(type: StudyStepType.measuring, duration: 30, actionButton: true),
+    StudyStep(type: StudyStepType.instruction, heading: "Kratzbewegung am Gaumen", description: "Führe mit deiner Zugnge eine Kratzbewegung am hinteren Gaumen durch. Tue dies für 2 Sekunden und anschließend 5 sekunden nichts. Wiederhole das."),
     StudyStep(type: StudyStepType.measuring, duration: 30),
-    StudyStep(type: StudyStepType.instruction, description: "Zweite Task Set 1"),
-    StudyStep(type: StudyStepType.measuring, duration: 30),
-    StudyStep(type: StudyStepType.instruction, description: "Dritte Task Set 1"),
+    StudyStep(type: StudyStepType.instruction, heading: "Kratzbewegung an den Augen", description: "Krate/Reibe deine Augen mit deinen Händen \n Tue das für 2 Sekunden, und anschließend 5 Sekunden nicht. \n Wiederhole diese Schritte."),
     StudyStep(type: StudyStepType.measuring, duration: 30),
   ];
 }

@@ -28,7 +28,6 @@ class _StudyRunnerState extends State<StudyRunner> {
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
     } else {
-      // Studie fertig → evtl. Ergebnisdialog oder Abschluss-Seite
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -36,14 +35,18 @@ class _StudyRunnerState extends State<StudyRunner> {
           content: const Text("Danke für die Teilnahme!"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.push(
-                context,
-                platformPageRoute(context: context, 
-                builder: (_) => StudySelection(),
-                ),
-              ),
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  platformPageRoute(
+                    context: context,
+                    builder: (_) => const StudySelection(),
+                  ),
+                  //TODO checken ob das noch passt, wenn Earables Selection erst noch kommen mus
+                  (route) => route.isFirst, // nur bis zum App-Start-Screen löschen
+                );
+              },
               child: const Text("OK"),
-            )
+            ),
           ],
         ),
       );
@@ -56,12 +59,14 @@ class _StudyRunnerState extends State<StudyRunner> {
 
     if (step.type == StudyStepType.instruction) {
       return InstructionScreen(
-        text: step.description,
+        heading: step.heading,
+        description: step.description,
         onNext: _nextStep,
       );
     } else {
       return MeasuringScreen(
         duration: step.duration,
+        actionButton: step.actionButton,
         onNext: _nextStep,
       );
     }

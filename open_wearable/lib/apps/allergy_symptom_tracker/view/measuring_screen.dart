@@ -5,11 +5,13 @@ import 'package:camera/camera.dart';
 class MeasuringScreen extends StatefulWidget {
   final int duration;
   final VoidCallback onNext;
+  final bool actionButton;
 
   const MeasuringScreen({
     super.key,
     required this.duration,
     required this.onNext,
+    required this.actionButton,
   });
 
   @override
@@ -137,7 +139,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                 ),
               ),
 
-              // untere Hälfte: Timer + Skip
+              // untere Hälfte: Timer + Buttons
               Expanded(
                 flex: 1,
                 child: Container(
@@ -146,6 +148,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Timer
                       Text(
                         '$_remaining s',
                         style: const TextStyle(
@@ -155,12 +158,40 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
+
+                      // 🟢 Optionaler Action-Button
+                      if (widget.actionButton)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: OutlinedButton(
+                            onPressed: () {
+                              // TODO: hier gewünschte Aktion einbauen
+                              debugPrint("Action button pressed!");
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.green, width: 3),
+                              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: const Text(
+                              "Action",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // 🔴 Skip/Cancel Button
                       ElevatedButton(
                         onPressed: _cancelAndNext,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -174,10 +205,11 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   ),
                 ),
               ),
+
             ],
           ),
 
-          // 🔹 Overlay für 3-2-1 Countdown
+          // Overlay for 3-2-1 Countdown
           if (_showPreCountdown)
             Container(
               color: Colors.black.withOpacity(0.7),
