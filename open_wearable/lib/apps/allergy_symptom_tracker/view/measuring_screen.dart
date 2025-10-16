@@ -19,15 +19,19 @@ class MeasuringScreen extends StatefulWidget {
 class _MeasuringScreenState extends State<MeasuringScreen> {
   late int _remaining;
   Timer? _timer;
+  Timer? _preTimer;
   CameraController? _cameraController;
   Future<void>? _initializeControllerFuture;
+
+  bool _showPreCountdown = true; // 👈 zeigt an, ob 3-2-1 Overlay aktiv ist
+  int _preCount = 3;             // 👈 aktueller Wert des 3s-Countdowns
 
   @override
   void initState() {
     super.initState();
     _remaining = widget.duration;
     _initCamera();
-    _startTimer();
+    _startPreCountdown();
   }
 
   Future<void> _initCamera() async {
@@ -51,7 +55,23 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     }
   }
 
-  void _startTimer() {
+  // 🔹 Countdown vor der Messung
+  void _startPreCountdown() {
+    _preTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_preCount <= 1) {
+        t.cancel();
+        setState(() {
+          _showPreCountdown = false;
+        });
+        _startMeasurementTimer();
+      } else {
+        setState(() => _preCount--);
+      }
+    });
+  }
+
+  // 🔹 Eigentliche Messung
+  void _startMeasurementTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (_remaining <= 1) {
         _cancelAndNext();
@@ -63,6 +83,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
   void _cancelAndNext() {
     _timer?.cancel();
+    _preTimer?.cancel();
     _cameraController?.dispose();
     widget.onNext();
   }
@@ -70,6 +91,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _preTimer?.cancel();
     _cameraController?.dispose();
     super.dispose();
   }
@@ -78,78 +100,98 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
+      body: Stack(
         children: [
-          // 🔹 obere Hälfte: Kamera
-          Expanded(
-            flex: 1,
-            child: Container(
-              width: double.infinity,
-              color: Colors.black,
-              child: FutureBuilder<void>(
-                future: _initializeControllerFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done &&
-                      _cameraController != null &&
-                      _cameraController!.value.isInitialized) {
-                    // BoxFit.cover sorgt dafür, dass keine schwarzen Ränder bleiben
-                    return ClipRect(
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: SizedBox(
-                          width: _cameraController!.value.previewSize!.height,
-                          height: _cameraController!.value.previewSize!.width,
-                          child: CameraPreview(_cameraController!),
+          // 🔹 Hauptinhalt (Kamera + Timer)
+          Column(
+            children: [
+              // obere Hälfte: Kamera
+              Expanded(
+                flex: 1,
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.black,
+                  child: FutureBuilder<void>(
+                    future: _initializeControllerFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done &&
+                          _cameraController != null &&
+                          _cameraController!.value.isInitialized) {
+                        return ClipRect(
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            child: SizedBox(
+                              width: _cameraController!.value.previewSize!.height,
+                              height: _cameraController!.value.previewSize!.width,
+                              child: CameraPreview(_cameraController!),
+                            ),
+                          ),
+                        );
+                      } else {
+                        return const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
+
+              // untere Hälfte: Timer + Skip
+              Expanded(
+                flex: 1,
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.white,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '$_remaining s',
+                        style: const TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
-                    );
-                  } else {
-                    return const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    );
-                  }
-                },
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _cancelAndNext,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Skip",
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
 
-          // 🔹 untere Hälfte: Timer + Button
-          Expanded(
-            flex: 1,
-            child: Container(
-              width: double.infinity,
-              color: Colors.white,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '$_remaining s',
-                    style: const TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+          // 🔹 Overlay für 3-2-1 Countdown
+          if (_showPreCountdown)
+            Container(
+              color: Colors.black.withOpacity(0.7),
+              child: Center(
+                child: Text(
+                  '$_preCount',
+                  style: const TextStyle(
+                    fontSize: 100,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _cancelAndNext,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      "skip",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
