@@ -9,6 +9,8 @@ class StudyStep {
   final String description;
   final int duration;
   final bool actionButton;
+  final bool signalFrame;
+  final List<int> measuringTimes;
 
   StudyStep({
     required this.type,
@@ -17,5 +19,7 @@ class StudyStep {
     this.description = "",
     this.duration = 0,
     this.actionButton = false,
+    this.signalFrame = false,
+    this.measuringTimes = const [0,0],
   });
 }

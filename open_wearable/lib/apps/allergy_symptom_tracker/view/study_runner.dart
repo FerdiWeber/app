@@ -68,6 +68,8 @@ class _StudyRunnerState extends State<StudyRunner> {
         duration: step.duration,
         actionButton: step.actionButton,
         onNext: _nextStep,
+        signalFrame: step.signalFrame,
+        measuringTimes: step.measuringTimes,
       );
     }
   }
