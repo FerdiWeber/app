@@ -237,9 +237,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                             },
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(
-                                  color: Colors.green, width: 3),
+                                  color: Colors.green, width: 3,),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 50, vertical: 20),
+                                  horizontal: 50, vertical: 20,),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -260,7 +260,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 16),
+                              horizontal: 40, vertical: 16,),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
