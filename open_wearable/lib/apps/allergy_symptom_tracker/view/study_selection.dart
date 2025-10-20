@@ -2,6 +2,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.dart';
 import 'study_runner.dart';
+import 'explanation_screen.dart';
 
 class StudySelection extends StatefulWidget {
   const StudySelection({super.key});
@@ -111,7 +112,8 @@ class _StudySelectionState extends State<StudySelection> {
                         context,
                         platformPageRoute(
                           context: context,
-                          builder: (_) => StudyRunner(protocol: selectedProtocol),
+                          builder: (_) => ExplanationScreen (nextScreen: StudyRunner(protocol: selectedProtocol))
+                          //builder: (_) => StudyRunner(protocol: selectedProtocol),
                         ),
                       );
                     },
