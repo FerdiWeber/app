@@ -110,9 +110,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
   // 🔹 Frame-Cycle für Signal-Modus
   void _startFrameCycle() {
-    if (!widget.signalFrame || widget.measuringTimes.isEmpty) return;
-    _cycleIndex = 0;
-    _runNextPhase();
+     if (!widget.signalFrame || widget.measuringTimes.isEmpty) return;
+      _cycleIndex = widget.signalFrame ? 1 : 0;
+      _runNextPhase();
   }
 
   void _runNextPhase() async {
