@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 class MeasuringScreen extends StatefulWidget {
   final int duration;
   final VoidCallback onNext;
+  final VoidCallback onStart;
   final bool actionButton;
   final bool signalFrame;
   final List<int> measuringTimes;
@@ -13,6 +14,7 @@ class MeasuringScreen extends StatefulWidget {
     super.key,
     required this.duration,
     required this.onNext,
+    required this.onStart,
     required this.actionButton,
     required this.signalFrame,
     required this.measuringTimes,
@@ -78,6 +80,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
         setState(() {
           _showPreCountdown = false;
         });
+        widget.onStart(); // HIER wird die Aufnahme gestartet!
         _startMeasurementTimer();
       } else {
         setState(() => _preCount--);
