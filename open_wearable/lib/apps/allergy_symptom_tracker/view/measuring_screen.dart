@@ -10,6 +10,9 @@ class MeasuringScreen extends StatefulWidget {
   final bool signalFrame;
   final List<int> measuringTimes;
 
+  final VoidCallback? onActionButtonPressed;
+  final Function(bool isGreen)? onSignalFrameChanged;
+
   const MeasuringScreen({
     super.key,
     required this.duration,
@@ -18,6 +21,9 @@ class MeasuringScreen extends StatefulWidget {
     required this.actionButton,
     required this.signalFrame,
     required this.measuringTimes,
+
+    this.onActionButtonPressed,
+    this.onSignalFrameChanged,
   });
 
   @override
@@ -25,13 +31,13 @@ class MeasuringScreen extends StatefulWidget {
 }
 
 class _MeasuringScreenState extends State<MeasuringScreen> {
-  late int _remaining; // Gesamtdauer
-  int _phaseRemaining = 0; // 🟢 Restzeit der aktuellen Farbphase
+  late int _remaining; 
+  int _phaseRemaining = 0; 
 
   Timer? _timer;
   Timer? _preTimer;
   Timer? _colorTimer;
-  Timer? _phaseTimer; // 🟢 Neuer Timer für Phasen-Countdown
+  Timer? _phaseTimer;
 
   CameraController? _cameraController;
   Future<void>? _initializeControllerFuture;
@@ -123,14 +129,16 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     int phaseDuration =
         widget.measuringTimes[_cycleIndex % widget.measuringTimes.length];
 
-    // 🟢 Start der neuen Farbphase
+    // Start der neuen Farbphase
     setState(() {
       _isGreen = nextIsGreen;
       _showFrame = true;
       _phaseRemaining = phaseDuration;
     });
 
-    // 🟢 Starte separaten Timer für den Phasen-Countdown
+    widget.onSignalFrameChanged?.call(nextIsGreen);
+
+    // Starte separaten Timer für den Phasen-Countdown
     _phaseTimer?.cancel();
     _phaseTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (_phaseRemaining <= 1) {
@@ -169,7 +177,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 🟢 Entscheide, welcher Timer angezeigt wird
+    // Entscheide, welcher Timer angezeigt wird
     final int displayTime =
         widget.signalFrame ? _phaseRemaining : _remaining;
 
@@ -236,6 +244,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                           padding: const EdgeInsets.only(bottom: 20),
                           child: OutlinedButton(
                             onPressed: () {
+                              widget.onActionButtonPressed?.call();
                               debugPrint("Action button pressed!");
                             },
                             style: OutlinedButton.styleFrom(

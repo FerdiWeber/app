@@ -16,7 +16,7 @@ import 'package:open_wearable/apps/allergy_symptom_tracker/view/study_selection.
 
 class StudyRunner extends StatefulWidget {
   final StudyProtocol protocol;
-  // Hinzufügen der benötigten Wearable-Informationen
+
   final Wearable leftWearable;
   final Wearable rightWearable;
   final SensorConfigurationProvider leftConfigProvider;
@@ -163,6 +163,27 @@ class _StudyRunnerState extends State<StudyRunner> {
         onNext: _stopMeasuring, // Stoppt die Messung
         signalFrame: step.signalFrame,
         measuringTimes: step.measuringTimes,
+
+        onActionButtonPressed: () {
+          final currentStep = _steps[_currentIndex];
+          _logger.logOtherEvent(
+            _measuringStepCounter,
+            currentStep.heading,
+            currentStep.heading,
+            "ActionButton_Pressed",
+          );
+        },
+
+        // Implementierung für den Signal Frame
+        onSignalFrameChanged: (bool isGreen) {
+          final currentStep = _steps[_currentIndex];
+          _logger.logOtherEvent(
+            _measuringStepCounter,
+            currentStep.heading,
+            currentStep.heading,
+            isGreen ? "SignalFrame_Start" : "SignalFrame_Stop",
+          );
+        },
       );
     }
   }
