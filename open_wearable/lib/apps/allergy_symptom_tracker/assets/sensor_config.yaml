@@ -1,0 +1,20 @@
+# Definiert, welche Sensoren mit welcher Rate aufnehmen sollen.
+# Diese Struktur wird von SensorConfig.fromYaml in config.dart erwartet.
+global_sensor_configs:
+  - sensor: imu
+    sample_rate: 50
+  - sensor: pressure
+    sample_rate: 50
+  - sensor: microphone
+    sample_rate: 48000
+  - sensor: ppg
+    sample_rate: 50
+  - sensor: bone_conduction
+    sample_rate: 1600
+  - sensor: temperature
+    sample_rate: 8
+
+# Diese Sektionen werden von ExperimentConfig.fromYaml gelesen.
+# Sie können leer bleiben, wenn sie für die Allergy-App nicht benötigt werden.
+sensor_id_map: {}
+blocks: []

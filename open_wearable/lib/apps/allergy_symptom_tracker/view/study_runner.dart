@@ -6,7 +6,7 @@ import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 // Importiere deine neuen Manager- und Logger-Klassen
 import 'package:open_wearable/apps/allergy_symptom_tracker/controller/manager.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/controller/logger.dart';
-import 'package:open_wearable/apps/allergy_symptom_tracker/model/config.dart'; // Du brauchst wahrscheinlich auch die Config
+import 'package:open_wearable/apps/allergy_symptom_tracker/model/config.dart';
 
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_step.dart';
@@ -45,7 +45,9 @@ class _StudyRunnerState extends State<StudyRunner> {
   // Instanzen für Manager und Logger
   late final ExperimentManager _manager;
   late final ExperimentLogger _logger;
-  late final ExperimentConfig _expConfig; // Du musst eine Config laden oder erstellen
+  late final ExperimentConfig _expConfig;
+
+  late final Future<void> _loadingFuture;
 
   @override
   void initState() {
@@ -53,21 +55,21 @@ class _StudyRunnerState extends State<StudyRunner> {
     _steps = widget.protocol.getSteps();
     _logger = ExperimentLogger();
 
-    // Erstelle eine Dummy-Konfiguration. Idealerweise lädst du diese aus einer YAML-Datei.
-    // Diese Konfiguration bestimmt, welche Sensoren mit welcher Rate aufnehmen.
-    _expConfig = ExperimentConfig(
-      blocks: [], // Nicht benötigt für diese Logik
-      sensorIdMap: {},
-      globalSensorConfigs: [
-        SensorConfig(sensor: 'imu', sampleRate: 50),
-        SensorConfig(sensor: 'pressure', sampleRate: 50),
-        SensorConfig(sensor: 'microphone', sampleRate: 48000),
-        SensorConfig(sensor: 'ppg', sampleRate: 50),
-        SensorConfig(sensor: 'bone_conduction', sampleRate: 1600),
-        SensorConfig(sensor: 'temperature', sampleRate: 8),
-      ],
-    );
+    _loadingFuture = _loadConfigAndInitManager();
+  }
 
+  // Lädt die YAML und initialisiert den Manager
+  Future<void> _loadConfigAndInitManager() async {
+    // Pfad zur YAML-Datei (muss in pubspec.yaml registriert sein)
+    const String configPath = 'lib/apps/allergy_symptom_tracker/assets/sensor_config.yaml';
+    
+    // "seed" wird in config.dart für die Randomisierung von Blöcken verwendet.
+    // Wir verwenden hier die experimentId, um eine konsistente (aber pro ID einzigartige) Randomisierung zu erhalten.
+    final seed = widget.experimentId; 
+
+    _expConfig = await ExperimentConfig.fromFile(configPath, seed);
+
+    // Initialisiere den Manager, SOBALD die Config geladen ist
     _manager = ExperimentManager(
       logger: _logger,
       expConfig: _expConfig,
@@ -124,7 +126,6 @@ class _StudyRunnerState extends State<StudyRunner> {
             Navigator.of(context).pushAndRemoveUntil(
               platformPageRoute(
                 context: context,
-                // KORREKTUR: Übergebe die benötigten Parameter hier
                 builder: (_) => StudySelection(
                   leftWearable: widget.leftWearable,
                   rightWearable: widget.rightWearable,
@@ -132,7 +133,6 @@ class _StudyRunnerState extends State<StudyRunner> {
                   rightConfigProvider: widget.rightConfigProvider,
                 ),
               ),
-              // Dieser Teil löscht alle vorherigen Screens, was korrekt ist.
               (route) => route.isFirst,
             );
           },
@@ -146,45 +146,74 @@ class _StudyRunnerState extends State<StudyRunner> {
 
  @override
   Widget build(BuildContext context) {
-    final step = _steps[_currentIndex];
-
-    if (step.type == StudyStepType.instruction) {
-      return InstructionScreen(
-        heading: step.heading,
-        description: step.description,
-        onNext: _nextStep,
-        pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
-      );
-    } else {
-      return MeasuringScreen(
-        duration: step.duration,
-        actionButton: step.actionButton,
-        onStart: _startMeasuring, // Neue Callback-Funktion
-        onNext: _stopMeasuring, // Stoppt die Messung
-        signalFrame: step.signalFrame,
-        measuringTimes: step.measuringTimes,
-
-        onActionButtonPressed: () {
-          final currentStep = _steps[_currentIndex];
-          _logger.logOtherEvent(
-            _measuringStepCounter,
-            currentStep.heading,
-            currentStep.heading,
-            "ActionButton_Pressed",
+    // FutureBuilder wartet auf das Laden der Konfiguration
+    return FutureBuilder<void>(
+      future: _loadingFuture,
+      builder: (context, snapshot) {
+        // Fall 1: Warten auf das Laden
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return PlatformScaffold(
+            body: Center(
+              child: PlatformCircularProgressIndicator(),
+            ),
           );
-        },
+        }
 
-        // Implementierung für den Signal Frame
-        onSignalFrameChanged: (bool isGreen) {
-          final currentStep = _steps[_currentIndex];
-          _logger.logOtherEvent(
-            _measuringStepCounter,
-            currentStep.heading,
-            currentStep.heading,
-            isGreen ? "SignalFrame_Start" : "SignalFrame_Stop",
+        // Fall 2: Fehler beim Laden (z.B. YAML nicht gefunden)
+        if (snapshot.hasError) {
+          return PlatformScaffold(
+            appBar: PlatformAppBar(title: Text("Fehler")),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  "Fehler beim Laden der Konfiguration:\nStellen Sie sicher, dass '.../study_config.yaml' existiert und in pubspec.yaml registriert ist.\n\nFehlerdetails: ${snapshot.error}",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           );
-        },
-      );
-    }
+        }
+
+        // Fall 3: Erfolgreich geladen, zeige die normale UI
+        final step = _steps[_currentIndex];
+
+        if (step.type == StudyStepType.instruction) {
+          return InstructionScreen(
+            heading: step.heading,
+            description: step.description,
+            onNext: _nextStep,
+            pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
+          );
+        } else {
+          return MeasuringScreen(
+            duration: step.duration,
+            actionButton: step.actionButton,
+            onStart: _startMeasuring,
+            onNext: _stopMeasuring,
+            signalFrame: step.signalFrame,
+            measuringTimes: step.measuringTimes,
+            onActionButtonPressed: () {
+              final currentStep = _steps[_currentIndex];
+              _logger.logOtherEvent(
+                _measuringStepCounter,
+                currentStep.heading,
+                currentStep.heading,
+                "ActionButton_Pressed",
+              );
+            },
+            onSignalFrameChanged: (bool isGreen) {
+              final currentStep = _steps[_currentIndex];
+              _logger.logOtherEvent(
+                _measuringStepCounter,
+                currentStep.heading,
+                currentStep.heading,
+                isGreen ? "SignalFrame_Start" : "SignalFrame_Stop",
+              );
+            },
+          );
+        }
+      },
+    );
   }
 }
