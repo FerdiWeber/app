@@ -40,6 +40,7 @@ class StudyRunner extends StatefulWidget {
 class _StudyRunnerState extends State<StudyRunner> {
   late final List<StudyStep> _steps;
   int _currentIndex = 0;
+  int _measuringStepCounter = 0;
 
   // Instanzen für Manager und Logger
   late final ExperimentManager _manager;
@@ -78,9 +79,13 @@ class _StudyRunnerState extends State<StudyRunner> {
   }
 
   Future<void> _startMeasuring() async {
+    setState(() {
+      _measuringStepCounter++;
+    });
+
     final step = _steps[_currentIndex];
     final date = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final recordingId = "${widget.experimentId}_step${_currentIndex}_${step.heading.replaceAll(' ', '')}_$date";
+    final recordingId = "${widget.experimentId}_step${_measuringStepCounter}_${step.heading.replaceAll(' ', '')}_$date";
 
     // Starte das Logging für diese Messung
     await _logger.startLogging(recordingId, false);
