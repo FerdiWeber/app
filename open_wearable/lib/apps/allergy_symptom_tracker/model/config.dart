@@ -58,7 +58,6 @@ class ExperimentConfig {
   }
 
   factory ExperimentConfig.fromYaml(YamlMap map, String seed) {
-
     // Parse sensor ID mapping if it exists
     Map<String, String> sensorIdMap = {};
     if (map.containsKey('sensor_id_map')) {

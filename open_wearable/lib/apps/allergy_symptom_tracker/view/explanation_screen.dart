@@ -27,8 +27,8 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
     },
     {
       'text': 'Hier siehts du die zweite Art wie aufgezeichnet wird. Man sieht abwechslen einen grünen Rahmen und einen roten. Beide sind mit einem Timer versehen, welcher anzeigt,'
-        'wie lange die aktuelle Farbe noch bestehen bleibt. Sobald der Rahmen grün ist, soll die Reaktion so lange ununterbrochen durchgeführt werden, bis der Rahemn rot wird. Während der'
-        'Rahmen rot ist, soll nichts geatn werden',
+          'wie lange die aktuelle Farbe noch bestehen bleibt. Sobald der Rahmen grün ist, soll die Reaktion so lange ununterbrochen durchgeführt werden, bis der Rahemn rot wird. Während der'
+          'Rahmen rot ist, soll nichts geatn werden',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_2.png',
     },
   ];
@@ -86,7 +86,8 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48), // Platzhalter für zentrierte Überschrift
+                  const SizedBox(
+                      width: 48), // Platzhalter für zentrierte Überschrift
                 ],
               ),
               const SizedBox(height: 16),

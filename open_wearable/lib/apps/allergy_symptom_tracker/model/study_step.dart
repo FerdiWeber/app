@@ -1,6 +1,6 @@
 //to distinguishe different screens during the study
 
-enum StudyStepType {instruction, measuring}
+enum StudyStepType { instruction, measuring }
 
 class StudyStep {
   final StudyStepType type;
@@ -20,6 +20,6 @@ class StudyStep {
     this.duration = 0,
     this.actionButton = false,
     this.signalFrame = false,
-    this.measuringTimes = const [0,0],
+    this.measuringTimes = const [0, 0],
   });
 }
