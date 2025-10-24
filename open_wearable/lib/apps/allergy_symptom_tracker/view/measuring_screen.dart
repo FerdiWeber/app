@@ -9,6 +9,7 @@ class MeasuringScreen extends StatefulWidget {
   final int duration;
   final VoidCallback onNext;
   final VoidCallback onStart;
+  final VoidCallback onLeaveStudy;
   final bool actionButton;
   final bool signalFrame;
   final List<int> measuringTimes;
@@ -26,15 +27,14 @@ class MeasuringScreen extends StatefulWidget {
     required this.duration,
     required this.onNext,
     required this.onStart,
+    required this.onLeaveStudy,
     required this.actionButton,
     required this.signalFrame,
     required this.measuringTimes,
-
     required this.logger,
     required this.recordingId,
     required this.stepHeading,
     required this.measuringStepCounter,
-
     this.onActionButtonPressed,
     this.onSignalFrameChanged,
   });
@@ -44,8 +44,8 @@ class MeasuringScreen extends StatefulWidget {
 }
 
 class _MeasuringScreenState extends State<MeasuringScreen> {
-  late int _remaining; 
-  int _phaseRemaining = 0; 
+  late int _remaining;
+  int _phaseRemaining = 0;
 
   Timer? _timer;
   Timer? _preTimer;
@@ -100,15 +100,14 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
     try {
       await _cameraController!.startVideoRecording();
-      
-      //WICHTIG: Logge den exakten Startzeitpunkt
+
       widget.logger.logOtherEvent(
         widget.measuringStepCounter,
         widget.stepHeading,
         widget.stepHeading,
         "Video_Record_Start",
       );
-      
+
       debugPrint("Videoaufnahme gestartet.");
     } catch (e) {
       debugPrint("Fehler beim Starten der Videoaufnahme: $e");
@@ -116,14 +115,14 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   }
 
   Future<void> _stopVideoRecording() async {
-    if (_cameraController == null || !_cameraController!.value.isRecordingVideo) {
-      return; // Nicht am Aufnehmen
+    if (_cameraController == null ||
+        !_cameraController!.value.isRecordingVideo) {
+      return;
     }
 
     try {
       final XFile videoFile = await _cameraController!.stopVideoRecording();
 
-      // WICHTIG: Logge den exakten Stoppzeitpunkt
       widget.logger.logOtherEvent(
         widget.measuringStepCounter,
         widget.stepHeading,
@@ -131,13 +130,12 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
         "Video_Record_Stop",
       );
 
-      // Speichere die Datei mit der recordingId
       final directory = await getApplicationDocumentsDirectory();
-      final String savePath = '${directory.path}/${widget.recordingId}_video.mp4';
-      
+      final String savePath =
+          '${directory.path}/${widget.recordingId}_video.mp4';
+
       await videoFile.saveTo(savePath);
       debugPrint("Videoaufnahme gestoppt und gespeichert unter: $savePath");
-
     } catch (e) {
       debugPrint("Fehler beim Stoppen der Videoaufnahme: $e");
     }
@@ -164,14 +162,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       setState(() => _firstShowPreCountdown = false);
     }
 
-    // 🟢 Wenn SignalFrame aktiv: kein Gesamttimer-Countdown, nur Duration-Begrenzung
     if (widget.signalFrame) {
       _startFrameCycle();
-
-      // dieser Timer sorgt dafür, dass nach Ablauf der Gesamtdauer beendet wird
       _timer = Timer(Duration(seconds: widget.duration), _cancelAndNext);
     } else {
-      // 🔴 Normaler Modus: Einfach runterzählen
       _timer = Timer.periodic(const Duration(seconds: 1), (t) {
         if (_remaining <= 1) {
           _cancelAndNext();
@@ -182,11 +176,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     }
   }
 
-  // 🔹 Frame-Cycle für Signal-Modus
   void _startFrameCycle() {
-     if (!widget.signalFrame || widget.measuringTimes.isEmpty) return;
-      _cycleIndex = widget.signalFrame ? 1 : 0;
-      _runNextPhase();
+    if (!widget.signalFrame || widget.measuringTimes.isEmpty) return;
+    _cycleIndex = widget.signalFrame ? 1 : 0;
+    _runNextPhase();
   }
 
   void _runNextPhase() async {
@@ -194,7 +187,6 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     int phaseDuration =
         widget.measuringTimes[_cycleIndex % widget.measuringTimes.length];
 
-    // Start der neuen Farbphase
     setState(() {
       _isGreen = nextIsGreen;
       _showFrame = true;
@@ -203,7 +195,6 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
     widget.onSignalFrameChanged?.call(nextIsGreen);
 
-    // Starte separaten Timer für den Phasen-Countdown
     _phaseTimer?.cancel();
     _phaseTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (_phaseRemaining <= 1) {
@@ -231,6 +222,26 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     widget.onNext();
   }
 
+  void _cancelAndLeave() async {
+    _timer?.cancel();
+    _preTimer?.cancel();
+    _colorTimer?.cancel();
+    _phaseTimer?.cancel();
+
+    if (_cameraController != null &&
+        _cameraController!.value.isRecordingVideo) {
+      try {
+        await _cameraController!.stopVideoRecording();
+        debugPrint("Videoaufnahme (Abbruch) gestoppt.");
+      } catch (e) {
+        debugPrint("Fehler beim Stoppen der Videoaufnahme (Abbruch): $e");
+      }
+    }
+    _cameraController?.dispose();
+
+    widget.onLeaveStudy();
+  }
+
   @override
   void dispose() {
     _stopVideoRecording();
@@ -244,9 +255,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Entscheide, welcher Timer angezeigt wird
-    final int displayTime =
-        widget.signalFrame ? _phaseRemaining : _remaining;
+    final int displayTime = widget.signalFrame ? _phaseRemaining : _remaining;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -270,16 +279,17 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                           child: FittedBox(
                             fit: BoxFit.cover,
                             child: SizedBox(
-                              width: _cameraController!.value.previewSize!.height,
-                              height: _cameraController!.value.previewSize!.width,
+                              width:
+                                  _cameraController!.value.previewSize!.height,
+                              height:
+                                  _cameraController!.value.previewSize!.width,
                               child: CameraPreview(_cameraController!),
                             ),
                           ),
                         );
                       } else {
                         return const Center(
-                          child:
-                              CircularProgressIndicator(color: Colors.white),
+                          child: CircularProgressIndicator(color: Colors.white),
                         );
                       }
                     },
@@ -294,60 +304,87 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   width: double.infinity,
                   color: Colors.white,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '$displayTime s',
-                        style: const TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 40.0),
+                        child: Text(
+                          '$displayTime s',
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-
-                      if (widget.actionButton)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: OutlinedButton(
-                            onPressed: () {
-                              widget.onActionButtonPressed?.call();
-                              debugPrint("Action button pressed!");
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                  color: Colors.green, width: 3,),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 50, vertical: 20,),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (widget.actionButton)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    widget.onActionButtonPressed?.call();
+                                    debugPrint("Action button pressed!");
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(
+                                        color: Colors.green, width: 3),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 20),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Action",
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            SizedBox(
+                              height: 55,
+                              child: ElevatedButton(
+                                onPressed: _cancelAndNext,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Skip",
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ),
                               ),
                             ),
-                            child: const Text(
-                              "Action",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 55,
+                              child: ElevatedButton(
+                                onPressed: _cancelAndLeave,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Leave Study",
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-
-                      ElevatedButton(
-                        onPressed: _cancelAndNext,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 16,),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "Skip",
-                          style:
-                              TextStyle(fontSize: 18, color: Colors.white),
+                          ],
                         ),
                       ),
                     ],

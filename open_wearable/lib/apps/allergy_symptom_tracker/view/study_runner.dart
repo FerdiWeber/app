@@ -61,11 +61,12 @@ class _StudyRunnerState extends State<StudyRunner> {
   // Lädt die YAML und initialisiert den Manager
   Future<void> _loadConfigAndInitManager() async {
     // Pfad zur YAML-Datei (muss in pubspec.yaml registriert sein)
-    const String configPath = 'lib/apps/allergy_symptom_tracker/assets/sensor_config.yaml';
-    
+    const String configPath =
+        'lib/apps/allergy_symptom_tracker/assets/sensor_config.yaml';
+
     // "seed" wird in config.dart für die Randomisierung von Blöcken verwendet.
     // Wir verwenden hier die experimentId, um eine konsistente (aber pro ID einzigartige) Randomisierung zu erhalten.
-    final seed = widget.experimentId; 
+    final seed = widget.experimentId;
 
     _expConfig = await ExperimentConfig.fromFile(configPath, seed);
 
@@ -86,7 +87,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     });
 
     final step = _steps[_currentIndex];
-  
+
     // Starte das Logging für diese Messung
     await _logger.startLogging(recordingId, false);
     _logger.logTaskStart(_currentIndex, step.heading, step.duration);
@@ -104,9 +105,31 @@ class _StudyRunnerState extends State<StudyRunner> {
     _logger.logTaskEnd();
     await _logger.stopAndWriteLogging(false);
     print("Aufnahme gestoppt und gespeichert!");
-  
+
     // Gehe zum nächsten Schritt
     _nextStep();
+  }
+
+  Future<void> _leaveStudy() async {
+    // Stoppe die Sensoren (ohne die aktuellen Daten zu speichern)
+    await _manager.deactivateSensors();
+    print("Studie abgebrochen, Sensoren deaktiviert.");
+
+    // Navigiere zurück zum StudySelection-Screen
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        platformPageRoute(
+          context: context,
+          builder: (_) => StudySelection(
+            leftWearable: widget.leftWearable,
+            rightWearable: widget.rightWearable,
+            leftConfigProvider: widget.leftConfigProvider,
+            rightConfigProvider: widget.rightConfigProvider,
+          ),
+        ),
+        (route) => route.isFirst,
+      );
+    }
   }
 
   void _nextStep() {
@@ -114,35 +137,35 @@ class _StudyRunnerState extends State<StudyRunner> {
       setState(() => _currentIndex++);
     } else {
       showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: const Text("Studie abgeschlossen"),
-      content: const Text("Danke für die Teilnahme!"),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pushAndRemoveUntil(
-              platformPageRoute(
-                context: context,
-                builder: (_) => StudySelection(
-                  leftWearable: widget.leftWearable,
-                  rightWearable: widget.rightWearable,
-                  leftConfigProvider: widget.leftConfigProvider,
-                  rightConfigProvider: widget.rightConfigProvider,
-                ),
-              ),
-              (route) => route.isFirst,
-            );
-          },
-          child: const Text("OK"),
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Studie abgeschlossen"),
+          content: const Text("Danke für die Teilnahme!"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  platformPageRoute(
+                    context: context,
+                    builder: (_) => StudySelection(
+                      leftWearable: widget.leftWearable,
+                      rightWearable: widget.rightWearable,
+                      leftConfigProvider: widget.leftConfigProvider,
+                      rightConfigProvider: widget.rightConfigProvider,
+                    ),
+                  ),
+                  (route) => route.isFirst,
+                );
+              },
+              child: const Text("OK"),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
     }
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     // FutureBuilder wartet auf das Laden der Konfiguration
     return FutureBuilder<void>(
@@ -181,10 +204,10 @@ class _StudyRunnerState extends State<StudyRunner> {
             heading: step.heading,
             description: step.description,
             onNext: _nextStep,
+            onLeaveStudy: _leaveStudy,
             pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
           );
         } else {
-
           final date = DateTime.now().toIso8601String().replaceAll(':', '-');
           final recordingId =
               "${widget.experimentId}_step${_measuringStepCounter + 1}_${step.heading.replaceAll(' ', '')}_$date";
@@ -200,6 +223,7 @@ class _StudyRunnerState extends State<StudyRunner> {
 
             onStart: () => _startMeasuring(recordingId),
             onNext: _stopMeasuring,
+            onLeaveStudy: _leaveStudy,
             signalFrame: step.signalFrame,
             measuringTimes: step.measuringTimes,
             onActionButtonPressed: () {
