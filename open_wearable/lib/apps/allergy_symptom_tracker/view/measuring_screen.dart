@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:open_wearable/apps/allergy_symptom_tracker/controller/logger.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class MeasuringScreen extends StatefulWidget {
   final int duration;
@@ -9,6 +12,11 @@ class MeasuringScreen extends StatefulWidget {
   final bool actionButton;
   final bool signalFrame;
   final List<int> measuringTimes;
+
+  final ExperimentLogger logger;
+  final String recordingId;
+  final String stepHeading;
+  final int measuringStepCounter;
 
   final VoidCallback? onActionButtonPressed;
   final Function(bool isGreen)? onSignalFrameChanged;
@@ -21,6 +29,11 @@ class MeasuringScreen extends StatefulWidget {
     required this.actionButton,
     required this.signalFrame,
     required this.measuringTimes,
+
+    required this.logger,
+    required this.recordingId,
+    required this.stepHeading,
+    required this.measuringStepCounter,
 
     this.onActionButtonPressed,
     this.onSignalFrameChanged,
@@ -79,6 +92,57 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     }
   }
 
+  Future<void> _startVideoRecording() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+      debugPrint("Kamera nicht bereit für Aufnahme.");
+      return;
+    }
+
+    try {
+      await _cameraController!.startVideoRecording();
+      
+      //WICHTIG: Logge den exakten Startzeitpunkt
+      widget.logger.logOtherEvent(
+        widget.measuringStepCounter,
+        widget.stepHeading,
+        widget.stepHeading,
+        "Video_Record_Start",
+      );
+      
+      debugPrint("Videoaufnahme gestartet.");
+    } catch (e) {
+      debugPrint("Fehler beim Starten der Videoaufnahme: $e");
+    }
+  }
+
+  Future<void> _stopVideoRecording() async {
+    if (_cameraController == null || !_cameraController!.value.isRecordingVideo) {
+      return; // Nicht am Aufnehmen
+    }
+
+    try {
+      final XFile videoFile = await _cameraController!.stopVideoRecording();
+
+      // WICHTIG: Logge den exakten Stoppzeitpunkt
+      widget.logger.logOtherEvent(
+        widget.measuringStepCounter,
+        widget.stepHeading,
+        widget.stepHeading,
+        "Video_Record_Stop",
+      );
+
+      // Speichere die Datei mit der recordingId
+      final directory = await getApplicationDocumentsDirectory();
+      final String savePath = '${directory.path}/${widget.recordingId}_video.mp4';
+      
+      await videoFile.saveTo(savePath);
+      debugPrint("Videoaufnahme gestoppt und gespeichert unter: $savePath");
+
+    } catch (e) {
+      debugPrint("Fehler beim Stoppen der Videoaufnahme: $e");
+    }
+  }
+
   void _startPreCountdown() {
     _preTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (_preCount <= 1) {
@@ -86,7 +150,8 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
         setState(() {
           _showPreCountdown = false;
         });
-        widget.onStart(); // HIER wird die Aufnahme gestartet!
+        widget.onStart();
+        _startVideoRecording();
         _startMeasurementTimer();
       } else {
         setState(() => _preCount--);
@@ -156,17 +221,19 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     });
   }
 
-  void _cancelAndNext() {
+  Future<void> _cancelAndNext() async {
     _timer?.cancel();
     _preTimer?.cancel();
     _colorTimer?.cancel();
     _phaseTimer?.cancel();
+    await _stopVideoRecording();
     _cameraController?.dispose();
     widget.onNext();
   }
 
   @override
   void dispose() {
+    _stopVideoRecording();
     _timer?.cancel();
     _preTimer?.cancel();
     _colorTimer?.cancel();

@@ -80,15 +80,13 @@ class _StudyRunnerState extends State<StudyRunner> {
     );
   }
 
-  Future<void> _startMeasuring() async {
+  Future<void> _startMeasuring(String recordingId) async {
     setState(() {
       _measuringStepCounter++;
     });
 
     final step = _steps[_currentIndex];
-    final date = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final recordingId = "${widget.experimentId}_step${_measuringStepCounter}_${step.heading.replaceAll(' ', '')}_$date";
-
+  
     // Starte das Logging für diese Messung
     await _logger.startLogging(recordingId, false);
     _logger.logTaskStart(_currentIndex, step.heading, step.duration);
@@ -186,10 +184,21 @@ class _StudyRunnerState extends State<StudyRunner> {
             pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
           );
         } else {
+
+          final date = DateTime.now().toIso8601String().replaceAll(':', '-');
+          final recordingId =
+              "${widget.experimentId}_step${_measuringStepCounter + 1}_${step.heading.replaceAll(' ', '')}_$date";
+
           return MeasuringScreen(
             duration: step.duration,
             actionButton: step.actionButton,
-            onStart: _startMeasuring,
+
+            logger: _logger,
+            recordingId: recordingId,
+            stepHeading: step.heading, // Wird für das Logging-Event benötigt
+            measuringStepCounter: _measuringStepCounter + 1,
+
+            onStart: () => _startMeasuring(recordingId),
             onNext: _stopMeasuring,
             signalFrame: step.signalFrame,
             measuringTimes: step.measuringTimes,
