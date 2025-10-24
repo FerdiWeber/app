@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:open_wearable/apps/allergy_symptom_tracker/model/block.dart';
 import 'package:yaml/yaml.dart';
 
 /// Represents a sensor configuration for the chewing experiment
@@ -34,12 +33,10 @@ class SensorConfig {
 
 /// Represents a chewing side detection experiment configuration
 class ExperimentConfig {
-  final List<ExperimentBlock> blocks;
   final Map<String, String> sensorIdMap;
   final List<SensorConfig> globalSensorConfigs;
 
   ExperimentConfig({
-    required this.blocks,
     required this.sensorIdMap,
     required this.globalSensorConfigs,
   });
@@ -61,14 +58,6 @@ class ExperimentConfig {
   }
 
   factory ExperimentConfig.fromYaml(YamlMap map, String seed) {
-    // Parse blocks
-    final blockList = map['blocks'] as YamlList;
-    final blocks = blockList.asMap().entries.map((entry) {
-      final index = entry.key;
-      final block = entry.value as YamlMap;
-      final blockSeed = "${seed}_$index".hashCode;
-      return ExperimentBlock.fromYaml(block, blockSeed);
-    }).toList();
 
     // Parse sensor ID mapping if it exists
     Map<String, String> sensorIdMap = {};
@@ -88,7 +77,6 @@ class ExperimentConfig {
     }
 
     return ExperimentConfig(
-      blocks: blocks,
       sensorIdMap: sensorIdMap,
       globalSensorConfigs: globalSensorConfigs,
     );

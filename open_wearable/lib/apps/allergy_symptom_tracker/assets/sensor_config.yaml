@@ -13,8 +13,3 @@ global_sensor_configs:
     sample_rate: 1600
   - sensor: temperature
     sample_rate: 8
-
-# Diese Sektionen werden von ExperimentConfig.fromYaml gelesen.
-# Sie können leer bleiben, wenn sie für die Allergy-App nicht benötigt werden.
-sensor_id_map: {}
-blocks: []
