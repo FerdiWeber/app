@@ -19,16 +19,20 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
 
   final List<Map<String, String>> _pages = [
     {
-      'text': 'Im folgenden werden Reaktionen auf Allergie Symptome gemessen. Dazu siehst du immer zuerst eine Erklärung dafür, was du tun sollst.'
-          'Hast du die Erklärung durchglesen und verstanden, und die Aufzeichnung startest, gibt es zwei verschiedene Arten der Aufzeichnung. Die erste Siehst du hier.'
-          'Es du siehts dich selbst. Dazu läuft ein Timer wie lange die Aufzeichnung noch läuft. Bei dieser Variante gibt es einen Action Button. Betätige diesen immer exakt'
-          'zeitlich wenn du die Raktion durchführst',
+      'text': 'In den folgenden Schritten werden deine Reaktionen auf Allergiesymptome gemessen. '
+          'Zuerst erhältst du immer eine kurze Erklärung, was du tun sollst. '
+          'Nachdem du die Erklärung gelesen und verstanden hast, kannst du die Aufzeichnung starten. '
+          'Es gibt zwei Arten der Aufzeichnung. Die erste siehst du hier: '
+          'Du siehst dich selbst auf dem Bildschirm, während ein Timer die verbleibende Aufzeichnungszeit anzeigt. '
+          'In dieser Variante gibt es einen „Action“-Button. Betätige ihn immer genau in dem Moment, in dem du die Reaktion ausführst.',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_1.png',
     },
     {
-      'text': 'Hier siehts du die zweite Art wie aufgezeichnet wird. Man sieht abwechslen einen grünen Rahmen und einen roten. Beide sind mit einem Timer versehen, welcher anzeigt,'
-          'wie lange die aktuelle Farbe noch bestehen bleibt. Sobald der Rahmen grün ist, soll die Reaktion so lange ununterbrochen durchgeführt werden, bis der Rahemn rot wird. Während der'
-          'Rahmen rot ist, soll nichts geatn werden',
+      'text': 'Hier siehst du die zweite Art der Aufzeichnung. '
+          'Dabei erscheint abwechselnd ein grüner oder ein roter Rahmen um das Bild. '
+          'Beide Phasen sind mit einem Timer versehen, der anzeigt, wie lange die aktuelle Farbe noch besteht. '
+          'Sobald der Rahmen grün ist, führe die Reaktion kontinuierlich aus, bis der Rahmen wieder rot wird. '
+          'Während der roten Phase sollst du keine Aktion durchführen.',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_2.png',
     },
   ];

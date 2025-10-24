@@ -8,55 +8,80 @@ class Dataset1Protocol extends StudyProtocol {
   @override
   List<StudyStep> getSteps() => [
         StudyStep(
-            type: StudyStepType.instruction,
-            heading: "Schlucken",
-            description:
-                "Schlucke während der Aufzeichnung so oft wie möglich. Betätige dabei bei bei jedem Schlucken den Action Button"),
+          type: StudyStepType.instruction,
+          heading: "Schlucken",
+          description: "Schlucke während der Aufzeichnung so oft wie möglich. "
+              "Drücke bei jedem Schlucken den Action-Button.",
+        ),
         StudyStep(
-            type: StudyStepType.measuring, duration: 30, actionButton: true),
+          type: StudyStepType.measuring,
+          duration: 30,
+          actionButton: true,
+        ),
         StudyStep(
-            type: StudyStepType.instruction,
-            heading: "Kratzbewegung am Gaumen",
-            description:
-                "Führe mit deiner Zugnge eine Kratzbewegung am hinteren Gaumen durch. Tue dies für 2 Sekunden und anschließend 5 sekunden nichts. Wiederhole das."),
+          type: StudyStepType.instruction,
+          heading: "Kratzbewegung am Gaumen",
+          description:
+              "Führe mit deiner Zunge eine Kratzbewegung am hinteren Gaumen aus. "
+              "Halte diese Bewegung für 2 Sekunden und mache dann 5 Sekunden Pause. "
+              "Wiederhole diesen Ablauf während der gesamten Aufzeichnung.",
+        ),
         StudyStep(
-            type: StudyStepType.measuring,
-            duration: 30,
-            signalFrame: true,
-            measuringTimes: [2, 3]),
+          type: StudyStepType.measuring,
+          duration: 30,
+          signalFrame: true,
+          measuringTimes: [2, 3],
+        ),
         StudyStep(
-            type: StudyStepType.instruction,
-            heading: "Kratzbewegung an den Augen",
-            description:
-                "Krate/Reibe deine Augen mit deinen Händen \n Tue das für 2 Sekunden, und anschließend 5 Sekunden nicht. \n Wiederhole diese Schritte."),
-        StudyStep(type: StudyStepType.measuring, duration: 30),
+          type: StudyStepType.instruction,
+          heading: "Kratzbewegung an den Augen",
+          description: "Reibe oder kratze deine Augen sanft mit den Händen, "
+              "wenn der Rahmen grün ist. "
+              "Während der roten Phase sollst du nichts tun. "
+              "Wiederhole dies während der gesamten Messung.",
+        ),
         StudyStep(
-            type: StudyStepType.instruction,
-            heading: "Husten",
-            description:
-                "Huste während der Aufzeichnung immer dann wenn der Rahmen des Bildschirmes Grün wird. Während der Rahmen rot ist, soll nichts getan werden"),
+          type: StudyStepType.measuring,
+          duration: 30,
+          signalFrame: true,
+          measuringTimes: [2, 3],
+        ),
         StudyStep(
-            type: StudyStepType.measuring,
-            duration: 30,
-            signalFrame: true,
-            measuringTimes: [2, 3]),
+          type: StudyStepType.instruction,
+          heading: "Husten",
+          description: "Huste immer dann, wenn der Rahmen grün ist. "
+              "Während der roten Phase sollst du nicht husten.",
+        ),
         StudyStep(
-            type: StudyStepType.instruction,
-            heading: "Kratzbewegung an den Ohren",
-            description:
-                "Wenn der Rahmen grün ist, soll mit den Händen an den Ohren gekratzt/gerieben werden. Sobald der Rahmen rot wird, soll nichts getan werden"),
+          type: StudyStepType.measuring,
+          duration: 30,
+          signalFrame: true,
+          measuringTimes: [2, 3],
+        ),
         StudyStep(
-            type: StudyStepType.measuring,
-            duration: 30,
-            signalFrame: true,
-            measuringTimes: [2, 3]),
+          type: StudyStepType.instruction,
+          heading: "Kratzbewegung an den Ohren",
+          description:
+              "Wenn der Rahmen grün ist, kratze oder reibe mit den Händen an deinen Ohren. "
+              "Sobald der Rahmen rot wird, mache eine Pause.",
+        ),
         StudyStep(
-            type: StudyStepType.instruction,
-            heading: "Räuspern",
-            description:
-                "Räuspere dich in regelmäßigen Abständen. Bei jedem Räuspern soll der Action Button betätigt werden"),
+          type: StudyStepType.measuring,
+          duration: 30,
+          signalFrame: true,
+          measuringTimes: [2, 3],
+        ),
         StudyStep(
-            type: StudyStepType.measuring, duration: 30, actionButton: true),
+          type: StudyStepType.instruction,
+          heading: "Räuspern",
+          description: "Räuspere dich regelmäßig während der Aufzeichnung. "
+              "Drücke bei jedem Räuspern den Action-Button.",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          duration: 30,
+          actionButton: true,
+        ),
       ];
 }
 
