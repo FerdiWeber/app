@@ -84,7 +84,7 @@ class InstructionScreen extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  "Weiter",
+                  "Continue",
                   style: TextStyle(fontSize: 18),
                 ),
               ),
@@ -108,7 +108,7 @@ class InstructionScreen extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  "Studie verlassen",
+                  "Leave Study",
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),

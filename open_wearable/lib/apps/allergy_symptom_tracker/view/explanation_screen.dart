@@ -164,7 +164,7 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                     ),
                   ),
                   child: Text(
-                    _currentPage == _pages.length - 1 ? 'Starten' : 'Weiter',
+                    _currentPage == _pages.length - 1 ? 'Begin Study' : 'Next',
                     style: const TextStyle(fontSize: 18),
                   ),
                 ),
