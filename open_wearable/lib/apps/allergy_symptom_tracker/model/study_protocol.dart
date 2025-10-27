@@ -23,8 +23,8 @@ class Dataset1Protocol extends StudyProtocol {
           heading: "Kratzbewegung am Gaumen",
           description:
               "Führe mit deiner Zunge eine Kratzbewegung am hinteren Gaumen aus. "
-              "Halte diese Bewegung für 2 Sekunden und mache dann 5 Sekunden Pause. "
-              "Wiederhole diesen Ablauf während der gesamten Aufzeichnung.",
+              "Versuche diese Bewegung mit der Zunge in reelmäßigen Abständen für circa 2 sekunden durchzuführen "
+              "Betätige dabei parallel zum Beginn der Bewegung den Action Button",
         ),
         StudyStep(
           type: StudyStepType.measuring,
@@ -35,7 +35,7 @@ class Dataset1Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Kratzbewegung an den Augen",
-          description: "Reibe oder kratze deine Augen sanft mit den Händen, "
+          description: "Reibe oder kratze deine Augen mit den Händen, "
               "wenn der Rahmen grün ist. "
               "Während der roten Phase sollst du nichts tun. "
               "Wiederhole dies während der gesamten Messung.",
@@ -50,6 +50,7 @@ class Dataset1Protocol extends StudyProtocol {
           type: StudyStepType.instruction,
           heading: "Husten",
           description: "Huste immer dann, wenn der Rahmen grün ist. "
+              "Achte darauf, nicht schon zu husten, während der Rahmen noch rot ist. "
               "Während der roten Phase sollst du nicht husten.",
         ),
         StudyStep(
@@ -63,7 +64,8 @@ class Dataset1Protocol extends StudyProtocol {
           heading: "Kratzbewegung an den Ohren",
           description:
               "Wenn der Rahmen grün ist, kratze oder reibe mit den Händen an deinen Ohren. "
-              "Sobald der Rahmen rot wird, mache eine Pause.",
+              "Sobald der Rahmen rot wird, sollst du nichts tun."
+              "Achte darauf, niocht schon währen der Rahmen rot ist, die Bewegung auszuführen",
         ),
         StudyStep(
           type: StudyStepType.measuring,
@@ -75,6 +77,7 @@ class Dataset1Protocol extends StudyProtocol {
           type: StudyStepType.instruction,
           heading: "Räuspern",
           description: "Räuspere dich regelmäßig während der Aufzeichnung. "
+              "Versuche in gleichmäßigen Abständen zu Räuspern"
               "Drücke bei jedem Räuspern den Action-Button.",
         ),
         StudyStep(
