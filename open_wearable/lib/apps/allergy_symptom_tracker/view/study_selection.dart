@@ -93,24 +93,95 @@ class _StudySelectionState extends State<StudySelection> {
     }
   }
 
+  Future<void> _deleteLogFiles() async {
+    // 1. Finde alle Log-Dateien (CSV und MP4)
+    final List<File> filesToDelete = await ExperimentLogger.getAllLogFiles();
+
+    final directory = await getApplicationDocumentsDirectory();
+    final allFiles = directory.listSync();
+    for (var file in allFiles) {
+      // Füge MP4-Dateien hinzu
+      if (file is File && file.path.endsWith('.mp4')) {
+        if (!filesToDelete.any((existing) => existing.path == file.path)) {
+          filesToDelete.add(file);
+        }
+      }
+    }
+
+    if (filesToDelete.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Keine Logs zum Löschen gefunden.")),
+        );
+      }
+      return;
+    }
+
+    // 2. Bestätigungsdialog anzeigen (WICHTIG!)
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logs löschen?'),
+          content: Text(
+              'Möchtest du wirklich ${filesToDelete.length} Log-Dateien (CSV und MP4) endgültig löschen?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Abbrechen'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Löschen', style: TextStyle(color: Colors.red)),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    // 3. Wenn bestätigt, alle Dateien löschen
+    if (confirmed == true) {
+      int deleteCount = 0;
+      try {
+        for (final file in filesToDelete) {
+          // Verwende die statische delete-Methode vom Logger
+          await ExperimentLogger.deleteLogFile(file);
+          deleteCount++;
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$deleteCount Dateien gelöscht.')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Fehler beim Löschen: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: PlatformText("Allergy Symptom Tracker"),
-
-        // HIER IST DIE HINZUGEFÜGTE ÄNDERUNG:
         trailingActions: <Widget>[
           PlatformIconButton(
-            // Verwende PlatformIconButton statt IconButton
             icon: Icon(
               PlatformIcons(context).share,
-            ), // Holt das plattformspezifische Share-Icon
+            ),
             //tooltip: 'Logs exportieren',
-            onPressed: _exportLogFiles, // Ruft deine Export-Funktion auf
+            onPressed: _exportLogFiles,
+          ),
+          PlatformIconButton(
+            icon: Icon(PlatformIcons(context).delete), // Mülleimer-Icon
+            //tooltip: 'Logs löschen',
+            onPressed: _deleteLogFiles, // Ruft deine neue Löschfunktion auf
           ),
         ],
-        // ENDE DER ÄNDERUNG
       ),
       body: Align(
         alignment: Alignment.topCenter, // nur horizontal zentriert
