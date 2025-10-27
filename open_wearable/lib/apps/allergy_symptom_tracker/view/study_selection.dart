@@ -187,102 +187,116 @@ class _StudySelectionState extends State<StudySelection> {
         alignment: Alignment.topCenter, // nur horizontal zentriert
         child: Padding(
           padding: EdgeInsets.fromLTRB(32, _topSpacing, 32, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // nur so hoch wie nötig
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              PlatformText(
-                "Please select Dataset and Measurment ID to continue with",
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 16),
 
-              // Dropdown für Dataset-Auswahl
-              DropdownButtonFormField<String>(
-                initialValue: _selectedOption,
-                hint: const Text("Choose Dataset"),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          // NEU: Container als Rahmen hinzugefügt
+          child: Container(
+            padding: const EdgeInsets.all(20.0), // Innenabstand für den Rahmen
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!), // Rahmenfarbe
+              borderRadius: BorderRadius.circular(16.0), // Abgerundete Ecken
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // nur so hoch wie nötig
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                PlatformText(
+                  "Please select Dataset and Measurment ID to continue with",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
                 ),
-                items: const [
-                  DropdownMenuItem(
-                    value: "option1",
-                    child: Text("Dataset 1"),
-                  ),
-                  DropdownMenuItem(
-                    value: "option2",
-                    child: Text("Dataset 2"),
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _selectedOption = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-              // Eingabefeld für Measurement ID
-              TextFormField(
-                controller: _measurementController,
-                decoration: InputDecoration(
-                  labelText: "Enter Measurement ID",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                // Dropdown für Dataset-Auswahl
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedOption,
+                  hint: const Text("Choose Dataset"),
+
+                  // NEU: Abgerundete Ecken für das aufklappende Menü
+                  borderRadius: BorderRadius.circular(12.0),
+
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  items: const [
+                    DropdownMenuItem(
+                      value: "option1",
+                      child: Text("Dataset 1"),
+                    ),
+                    DropdownMenuItem(
+                      value: "option2",
+                      child: Text("Dataset 2"),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedOption = value;
+                    });
+                  },
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Start-Button
-              PlatformElevatedButton(
-                onPressed: (_selectedOption == null ||
-                        _measurementController.text.isEmpty)
-                    ? null
-                    : () {
-                        late final StudyProtocol selectedProtocol;
-                        if (_selectedOption == "option1") {
-                          selectedProtocol = Dataset1Protocol();
-                        } else {
-                          selectedProtocol = Dataset2Protocol();
-                        }
+                // Eingabefeld für Measurement ID
+                TextFormField(
+                  controller: _measurementController,
+                  decoration: InputDecoration(
+                    labelText: "Enter Measurement ID",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-                        // Navigiere zum ExplanationScreen und übergebe ALLE Daten
-                        Navigator.push(
-                          context,
-                          platformPageRoute(
-                            context: context,
-                            builder: (_) => ExplanationScreen(
-                              nextScreen: StudyRunner(
-                                protocol: selectedProtocol,
-                                experimentId: _measurementController.text,
-                                leftWearable: widget.leftWearable,
-                                rightWearable: widget.rightWearable,
-                                leftConfigProvider: widget.leftConfigProvider,
-                                rightConfigProvider: widget.rightConfigProvider,
+                // Start-Button
+                PlatformElevatedButton(
+                  onPressed: (_selectedOption == null ||
+                          _measurementController.text.isEmpty)
+                      ? null
+                      : () {
+                          late final StudyProtocol selectedProtocol;
+                          if (_selectedOption == "option1") {
+                            selectedProtocol = Dataset1Protocol();
+                          } else {
+                            selectedProtocol = Dataset2Protocol();
+                          }
+
+                          // Navigiere zum ExplanationScreen und übergebe ALLE Daten
+                          Navigator.push(
+                            context,
+                            platformPageRoute(
+                              context: context,
+                              builder: (_) => ExplanationScreen(
+                                nextScreen: StudyRunner(
+                                  protocol: selectedProtocol,
+                                  experimentId: _measurementController.text,
+                                  leftWearable: widget.leftWearable,
+                                  rightWearable: widget.rightWearable,
+                                  leftConfigProvider: widget.leftConfigProvider,
+                                  rightConfigProvider:
+                                      widget.rightConfigProvider,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                material: (_, __) => MaterialElevatedButtonData(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: (_selectedOption != null &&
-                            _measurementController.text.isNotEmpty)
-                        ? Colors.green
-                        : Colors.grey,
+                          );
+                        },
+                  material: (_, __) => MaterialElevatedButtonData(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: (_selectedOption != null &&
+                              _measurementController.text.isNotEmpty)
+                          ? Colors.green
+                          : Colors.grey,
+                    ),
                   ),
+                  child: const Text("Start"),
                 ),
-                child: const Text("Start"),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
