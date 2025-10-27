@@ -30,39 +30,60 @@ class InstructionScreen extends StatelessWidget {
                 // 3. Der Inhalt wird *innerhalb* des freien Platzes zentriert
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 隼 ﾃ彙erschrift (groﾃund fett)
                     Text(
                       heading,
-                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24), // Etwas mehr Abstand
 
-                    // 隼 Beschreibungstext (kleiner, grau)
-                    Text(
-                      description,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.black87,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Task:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Text(
+                            description,
+                            // textAlign: TextAlign.center, // Entfernt
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 24),
 
-                    // 隼 Optionales Bild
+                    // 🔹 Optionales Bild (jetzt zentriert)
                     if (pathToImage != null && pathToImage!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: Image.asset(
-                          pathToImage!,
-                          height: 200,
-                          fit: BoxFit.contain,
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: Image.asset(
+                            pathToImage!,
+                            height: 200,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                   ],
