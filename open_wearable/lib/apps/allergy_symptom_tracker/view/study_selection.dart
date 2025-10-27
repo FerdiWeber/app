@@ -7,6 +7,11 @@ import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.
 import 'study_runner.dart';
 import 'explanation_screen.dart';
 
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:open_wearable/apps/allergy_symptom_tracker/controller/logger.dart';
+
 class StudySelection extends StatefulWidget {
   // Hinzufügen der benötigten Parameter
   final Wearable leftWearable;
@@ -46,11 +51,66 @@ class _StudySelectionState extends State<StudySelection> {
     super.dispose();
   }
 
+  Future<void> _exportLogFiles() async {
+    // 1. Finde alle CSV-Logdateien
+    final List<File> logFiles = await ExperimentLogger.getAllLogFiles();
+
+    // 2. Finde die Video-Dateien (.mp4)
+    final directory = await getApplicationDocumentsDirectory();
+    final allFiles = directory.listSync();
+    for (var file in allFiles) {
+      if (file is File &&
+          (file.path.endsWith('.mp4') || file.path.endsWith('.csv'))) {
+        // .csv hinzugefügt, falls getAllLogFiles nicht alle erwischt
+        if (!logFiles.any((existing) => existing.path == file.path)) {
+          logFiles.add(file);
+        }
+      }
+    }
+
+    if (logFiles.isEmpty) {
+      print("Keine Log-Dateien zum Teilen gefunden.");
+      // Optional: Zeige dem Benutzer eine Meldung
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Keine Log-Dateien zum Exportieren gefunden.")),
+      );
+      return;
+    }
+
+    // 3. Konvertiere File-Objekte in XFile-Objekte
+    final List<XFile> filesToShare =
+        logFiles.map((file) => XFile(file.path)).toList();
+
+    // 4. Öffne den "Teilen"-Dialog
+    try {
+      await Share.shareXFiles(
+        filesToShare,
+        text: 'Allergie-Tagebuch Log-Dateien',
+      );
+    } catch (e) {
+      print("Fehler beim Teilen: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: PlatformText("Allergy Symptom Tracker"),
+
+        // HIER IST DIE HINZUGEFÜGTE ÄNDERUNG:
+        trailingActions: <Widget>[
+          PlatformIconButton(
+            // Verwende PlatformIconButton statt IconButton
+            icon: Icon(
+              PlatformIcons(context).share,
+            ), // Holt das plattformspezifische Share-Icon
+            //tooltip: 'Logs exportieren',
+            onPressed: _exportLogFiles, // Ruft deine Export-Funktion auf
+          ),
+        ],
+        // ENDE DER ÄNDERUNG
       ),
       body: Align(
         alignment: Alignment.topCenter, // nur horizontal zentriert

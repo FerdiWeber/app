@@ -143,6 +143,8 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
   void _startPreCountdown() {
     _preTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      //widget.onStart();
+      //_startVideoRecording();
       if (_preCount <= 1) {
         t.cancel();
         setState(() {
