@@ -334,9 +334,12 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                                   },
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(
-                                        color: Colors.green, width: 3),
+                                      color: Colors.green,
+                                      width: 3,
+                                    ),
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 20),
+                                      vertical: 20,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -364,7 +367,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                                 child: const Text(
                                   "Skip",
                                   style: TextStyle(
-                                      fontSize: 18, color: Colors.white),
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
@@ -382,7 +387,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                                 child: const Text(
                                   "Leave Study",
                                   style: TextStyle(
-                                      fontSize: 18, color: Colors.white),
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
