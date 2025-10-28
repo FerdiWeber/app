@@ -139,8 +139,8 @@ class _StudyRunnerState extends State<StudyRunner> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text("Studie abgeschlossen"),
-          content: const Text("Danke für die Teilnahme!"),
+          title: const Text("Studie completed"),
+          content: const Text("Thank you for participating!"),
           actions: [
             TextButton(
               onPressed: () {
