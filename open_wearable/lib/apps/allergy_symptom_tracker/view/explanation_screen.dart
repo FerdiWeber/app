@@ -20,11 +20,16 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
   final List<Map<String, String>> _pages = [
     {
       'text': 'In den folgenden Schritten werden deine Reaktionen auf Allergiesymptome gemessen. '
-          'Zuerst erhältst du immer eine kurze Erklärung, was du tun sollst. '
+          'Die App führt dich dabei Schritt für Schritt durch den Prozess. '
+          'Vor jeder Messung erhältst du eine kurze Erklärung, was du tun sollst. '
           'Nachdem du die Erklärung gelesen und verstanden hast, kannst du die Aufzeichnung starten. '
-          'Es gibt zwei Arten der Aufzeichnung. Die erste siehst du hier: '
+          'Grundsätzlich gilt: Verhalte dich während der Aufzeichnung ganz normal. '
+          'In der Studie werden zwei Arten von Aufzeichnungen verwendet. '
+          'Diese unterscheiden sich darin, wie markiert wird, wann du deine Reaktion ausführst. '
+          'Die erste Variante siehst du hier: '
           'Du siehst dich selbst auf dem Bildschirm, während ein Timer die verbleibende Aufzeichnungszeit anzeigt. '
-          'In dieser Variante gibt es einen „Action“-Button. Betätige ihn immer genau in dem Moment, in dem du die Reaktion ausführst.',
+          'In dieser Variante gibt es einen „Action“-Button. Drücke ihn immer genau zu Beginn deiner Reaktion. '
+          'Der Button dient später als Markierung in den Messdaten für den Start deiner Reaktion.',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_1.png',
     },
     {
@@ -32,7 +37,9 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
           'Dabei erscheint abwechselnd ein grüner oder ein roter Rahmen um das Bild. '
           'Beide Phasen sind mit einem Timer versehen, der anzeigt, wie lange die aktuelle Farbe noch besteht. '
           'Sobald der Rahmen grün ist, führe die Reaktion kontinuierlich aus, bis der Rahmen wieder rot wird. '
-          'Während der roten Phase sollst du keine Aktion durchführen.',
+          'Während der roten Phasen verhalte dich bitte ganz normal. '
+          'Eine Aufzeichnung mit dieser Art startet immer mit einer roten Phase.'
+          'Bei dieser Variante musst du keinen Button betätigen.',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_2.png',
     },
   ];

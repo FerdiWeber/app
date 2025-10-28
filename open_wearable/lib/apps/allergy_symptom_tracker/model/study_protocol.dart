@@ -10,8 +10,9 @@ class Dataset1Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Schlucken",
-          description: "Schlucke während der Aufzeichnung so oft wie möglich. "
-              "Drücke bei jedem Schlucken den Action-Button.",
+          description:
+              "Versuche während der Aufzeichnung in regelmäßigen Abständen zu schlucken. "
+              "Betätige dabei unmittelbar zu Beginn des Schluckens den Action-Button.",
         ),
         StudyStep(
           type: StudyStepType.measuring,
@@ -23,49 +24,52 @@ class Dataset1Protocol extends StudyProtocol {
           heading: "Kratzbewegung am Gaumen",
           description:
               "Führe mit deiner Zunge eine Kratzbewegung am hinteren Gaumen aus. "
-              "Versuche diese Bewegung mit der Zunge in reelmäßigen Abständen für circa 2 sekunden durchzuführen "
-              "Betätige dabei parallel zum Beginn der Bewegung den Action Button",
+              "Bei dieser Aufzeichnung gibt es keinen Action-Button; der grüne Rahmen zeigt an, wann du die Aktion ausführen sollst. "
+              "Führe die Aktion während der gesamten grünen Phase aus. "
+              "Verhalte dich während der roten Phasen normal.",
         ),
         StudyStep(
           type: StudyStepType.measuring,
           duration: 30,
           signalFrame: true,
-          measuringTimes: [2, 3],
+          measuringTimes: [2, 4],
         ),
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Kratzbewegung an den Augen",
-          description: "Reibe oder kratze deine Augen mit den Händen, "
-              "wenn der Rahmen grün ist. "
-              "Während der roten Phase sollst du nichts tun. "
-              "Wiederhole dies während der gesamten Messung.",
+          description: "Reibe oder kratze deine Augen mit den Händen. "
+              "Bei dieser Aufzeichnung gibt es keinen Action-Button; der grüne Rahmen zeigt an, wann du die Aktion ausführen sollst. "
+              "Führe die Aktion während der gesamten grünen Phase aus. "
+              "Verhalte dich während der roten Phasen normal.",
         ),
         StudyStep(
           type: StudyStepType.measuring,
           duration: 30,
           signalFrame: true,
-          measuringTimes: [2, 3],
+          measuringTimes: [2, 4],
         ),
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Husten",
-          description: "Huste immer dann, wenn der Rahmen grün ist. "
-              "Achte darauf, nicht schon zu husten, während der Rahmen noch rot ist. "
-              "Während der roten Phase sollst du nicht husten.",
+          description: "In diesem Schritt sollst du husten. "
+              "Bei dieser Aufzeichnung gibt es keinen Action-Button; der grüne Rahmen zeigt an, wann du die Aktion ausführen sollst. "
+              "Führe die Aktion während der gesamten grünen Phase aus. "
+              "Verhalte dich während der roten Phasen normal.",
         ),
         StudyStep(
           type: StudyStepType.measuring,
           duration: 30,
           signalFrame: true,
-          measuringTimes: [2, 3],
+          measuringTimes: [1, 4],
         ),
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Kratzbewegung an den Ohren",
-          description:
-              "Wenn der Rahmen grün ist, kratze oder reibe mit den Händen an deinen Ohren. "
-              "Sobald der Rahmen rot wird, sollst du nichts tun."
-              "Achte darauf, niocht schon währen der Rahmen rot ist, die Bewegung auszuführen",
+          description: "Reibe oder kratze deine Ohren mit den Händen. "
+              "Achte darauf, dass dabei die Kopfhörer nicht aus den Ohren fallen. "
+              "Bei dieser Aufzeichnung gibt es keinen Action-Button; der grüne Rahmen zeigt an, wann du die Aktion ausführen sollst. "
+              "Führe die Aktion während der gesamten grünen Phase aus. "
+              "Verhalte dich während der roten Phasen normal.",
         ),
         StudyStep(
           type: StudyStepType.measuring,
@@ -76,9 +80,9 @@ class Dataset1Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Räuspern",
-          description: "Räuspere dich regelmäßig während der Aufzeichnung. "
-              "Versuche in gleichmäßigen Abständen zu Räuspern"
-              "Drücke bei jedem Räuspern den Action-Button.",
+          description:
+              "Räuspere dich in regelmäßigen Abständen während der Aufzeichnung. "
+              "Betätige dabei unmittelbar zu Beginn des Räusperns den Action-Button.",
         ),
         StudyStep(
           type: StudyStepType.measuring,
