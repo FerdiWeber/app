@@ -41,27 +41,27 @@ class _StudySelectionState extends State<StudySelection> {
   void initState() {
     super.initState();
     _measurementController.addListener(() {
-      setState(() {}); // aktualisiert Buttonfarbe bei Texteingabe
+      setState(() {}); // Updates button color on text input
     });
   }
 
   @override
   void dispose() {
-    _measurementController.dispose(); // Speicher freigeben
+    _measurementController.dispose(); // Free up memory
     super.dispose();
   }
 
   Future<void> _exportLogFiles() async {
-    // 1. Finde alle CSV-Logdateien
+    // 1. Find all CSV log files
     final List<File> logFiles = await ExperimentLogger.getAllLogFiles();
 
-    // 2. Finde die Video-Dateien (.mp4)
+    // 2. Find video files (.mp4)
     final directory = await getApplicationDocumentsDirectory();
     final allFiles = directory.listSync();
     for (var file in allFiles) {
       if (file is File &&
           (file.path.endsWith('.mp4') || file.path.endsWith('.csv'))) {
-        // .csv hinzugefügt, falls getAllLogFiles nicht alle erwischt
+        // Added .csv in case getAllLogFiles missed something
         if (!logFiles.any((existing) => existing.path == file.path)) {
           logFiles.add(file);
         }
@@ -69,38 +69,39 @@ class _StudySelectionState extends State<StudySelection> {
     }
 
     if (logFiles.isEmpty) {
-      print("Keine Log-Dateien zum Teilen gefunden.");
-      // Optional: Zeige dem Benutzer eine Meldung
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Keine Log-Dateien zum Exportieren gefunden.")),
-      );
+      print("No log files found to share.");
+      // Optional: Show a message to the user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No log files found to export.")),
+        );
+      }
       return;
     }
 
-    // 3. Konvertiere File-Objekte in XFile-Objekte
+    // 3. Convert File objects to XFile objects
     final List<XFile> filesToShare =
         logFiles.map((file) => XFile(file.path)).toList();
 
-    // 4. Öffne den "Teilen"-Dialog
+    // 4. Open the "Share" dialog
     try {
       await Share.shareXFiles(
         filesToShare,
-        text: 'Allergie-Tagebuch Log-Dateien',
+        text: 'Allergy Symptom Tracker Log Files',
       );
     } catch (e) {
-      print("Fehler beim Teilen: $e");
+      print("Error while sharing: $e");
     }
   }
 
   Future<void> _deleteLogFiles() async {
-    // 1. Finde alle Log-Dateien (CSV und MP4)
+    // 1. Find all log files (CSV and MP4)
     final List<File> filesToDelete = await ExperimentLogger.getAllLogFiles();
 
     final directory = await getApplicationDocumentsDirectory();
     final allFiles = directory.listSync();
     for (var file in allFiles) {
-      // Füge MP4-Dateien hinzu
+      // Add MP4 files
       if (file is File && file.path.endsWith('.mp4')) {
         if (!filesToDelete.any((existing) => existing.path == file.path)) {
           filesToDelete.add(file);
@@ -111,52 +112,96 @@ class _StudySelectionState extends State<StudySelection> {
     if (filesToDelete.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Keine Logs zum Löschen gefunden.")),
+          const SnackBar(content: Text("No logs found to delete.")),
         );
       }
       return;
     }
 
-    // 2. Bestätigungsdialog anzeigen (WICHTIG!)
+    // 2. Show confirmation dialog (with text field)
     final bool? confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: false, // User must interact with the dialog
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logs löschen?'),
-          content: Text(
-              'Möchtest du wirklich ${filesToDelete.length} Log-Dateien (CSV und MP4) endgültig löschen?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Abbrechen'),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            TextButton(
-              child: const Text('Löschen', style: TextStyle(color: Colors.red)),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
+        final TextEditingController confirmController = TextEditingController();
+        const String confirmationText = 'delete';
+        bool isDeleteEnabled = false;
+
+        // Use StatefulBuilder to update the dialog's state
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Confirm Deletion'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      'Do you really want to permanently delete ${filesToDelete.length} log files (CSV and MP4)?'),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "This action cannot be undone. To confirm, please type 'delete' below:",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: confirmController,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: confirmationText,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        isDeleteEnabled =
+                            value.trim().toLowerCase() == confirmationText;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                TextButton(
+                  // Button is disabled (onPressed: null) until text matches
+                  onPressed: isDeleteEnabled
+                      ? () => Navigator.of(context).pop(true)
+                      : null,
+                  child: Text(
+                    'Delete',
+                    style: TextStyle(
+                      color: isDeleteEnabled ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
 
-    // 3. Wenn bestätigt, alle Dateien löschen
+    // 3. If confirmed, delete all files
     if (confirmed == true) {
       int deleteCount = 0;
       try {
         for (final file in filesToDelete) {
-          // Verwende die statische delete-Methode vom Logger
+          // Use the static delete method from the logger
           await ExperimentLogger.deleteLogFile(file);
           deleteCount++;
         }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$deleteCount Dateien gelöscht.')),
+            SnackBar(content: Text('$deleteCount files deleted.')),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Fehler beim Löschen: $e')),
+            SnackBar(content: Text('Error deleting files: $e')),
           );
         }
       }
@@ -173,47 +218,43 @@ class _StudySelectionState extends State<StudySelection> {
             icon: Icon(
               PlatformIcons(context).share,
             ),
-            //tooltip: 'Logs exportieren',
+            //tooltip: 'Export logs', // Translated
             onPressed: _exportLogFiles,
           ),
           PlatformIconButton(
-            icon: Icon(PlatformIcons(context).delete), // Mülleimer-Icon
-            //tooltip: 'Logs löschen',
-            onPressed: _deleteLogFiles, // Ruft deine neue Löschfunktion auf
+            icon: Icon(PlatformIcons(context).delete), // Trash can icon
+            //tooltip: 'Delete logs', // Translated
+            onPressed: _deleteLogFiles, // Calls your new delete function
           ),
         ],
       ),
       body: Align(
-        alignment: Alignment.topCenter, // nur horizontal zentriert
+        alignment: Alignment.topCenter, // only horizontally centered
         child: Padding(
           padding: EdgeInsets.fromLTRB(32, _topSpacing, 32, 16),
 
-          // NEU: Container als Rahmen hinzugefügt
+          // Container added as a frame
           child: Container(
-            padding: const EdgeInsets.all(20.0), // Innenabstand für den Rahmen
+            padding: const EdgeInsets.all(20.0), // Inner padding for the frame
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!), // Rahmenfarbe
-              borderRadius: BorderRadius.circular(16.0), // Abgerundete Ecken
+              border: Border.all(color: Colors.grey[300]!), // Frame color
+              borderRadius: BorderRadius.circular(16.0), // Rounded corners
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // nur so hoch wie nötig
+              mainAxisSize: MainAxisSize.min, // only as high as needed
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 PlatformText(
-                  "Please select Dataset and Measurment ID to continue with",
+                  "Please select Dataset and Measurement ID to continue with",
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 16),
 
-                // Dropdown für Dataset-Auswahl
                 DropdownButtonFormField<String>(
                   initialValue: _selectedOption,
                   hint: const Text("Choose Dataset"),
-
-                  // NEU: Abgerundete Ecken für das aufklappende Menü
                   borderRadius: BorderRadius.circular(12.0),
-
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -239,7 +280,6 @@ class _StudySelectionState extends State<StudySelection> {
                 ),
                 const SizedBox(height: 20),
 
-                // Eingabefeld für Measurement ID
                 TextFormField(
                   controller: _measurementController,
                   decoration: InputDecoration(
@@ -266,7 +306,7 @@ class _StudySelectionState extends State<StudySelection> {
                             selectedProtocol = Dataset2Protocol();
                           }
 
-                          // Navigiere zum ExplanationScreen und übergebe ALLE Daten
+                          // Navigate to ExplanationScreen and pass ALL data
                           Navigator.push(
                             context,
                             platformPageRoute(
