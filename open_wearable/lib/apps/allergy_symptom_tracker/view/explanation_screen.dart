@@ -19,27 +19,27 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
 
   final List<Map<String, String>> _pages = [
     {
-      'text': 'In den folgenden Schritten werden deine Reaktionen auf Allergiesymptome gemessen. '
-          'Die App führt dich dabei Schritt für Schritt durch den Prozess. '
-          'Vor jeder Messung erhältst du eine kurze Erklärung, was du tun sollst. '
-          'Nachdem du die Erklärung gelesen und verstanden hast, kannst du die Aufzeichnung starten. '
-          'Grundsätzlich gilt: Verhalte dich während der Aufzeichnung ganz normal. '
-          'In der Studie werden zwei Arten von Aufzeichnungen verwendet. '
-          'Diese unterscheiden sich darin, wie markiert wird, wann du deine Reaktion ausführst. '
-          'Die erste Variante siehst du hier: '
-          'Du siehst dich selbst auf dem Bildschirm, während ein Timer die verbleibende Aufzeichnungszeit anzeigt. '
-          'In dieser Variante gibt es einen „Action“-Button. Drücke ihn immer genau zu Beginn deiner Reaktion. '
-          'Der Button dient später als Markierung in den Messdaten für den Start deiner Reaktion.',
+      'text': 'This study uses the OpenEarables to measure possible reactions to allergy symptoms. '
+          'It aims to evaluate how well the built-in sensors can detect these reactions. '
+          'The app will guide you step by step through the process. '
+          'First, you’ll answer a few questions about your symptoms. Then, the actual recording begins. '
+          'Before each session, you’ll get clear instructions — read them carefully, then start recording. '
+          'Try to behave as naturally as possible during each session. '
+          'There are two types of recordings, which differ in how your actions are marked. Both are explained on the next pages.',
+    },
+    {
+      'text': 'This is the first recording type. '
+          'You’ll see yourself on screen while a timer shows the remaining recording time. '
+          'Press the “Action” button exactly when your reaction starts. '
+          'This button marks the beginning of your reaction in the data.',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_1.png',
     },
     {
-      'text': 'Hier siehst du die zweite Art der Aufzeichnung. '
-          'Dabei erscheint abwechselnd ein grüner oder ein roter Rahmen um das Bild. '
-          'Beide Phasen sind mit einem Timer versehen, der anzeigt, wie lange die aktuelle Farbe noch besteht. '
-          'Sobald der Rahmen grün ist, führe die Reaktion kontinuierlich aus, bis der Rahmen wieder rot wird. '
-          'Während der roten Phasen verhalte dich bitte ganz normal. '
-          'Eine Aufzeichnung mit dieser Art startet immer mit einer roten Phase.'
-          'Bei dieser Variante musst du keinen Button betätigen.',
+      'text': 'This is the second recording type. '
+          'A green or red frame alternates around the screen, each with a countdown timer. '
+          'When the frame is green, perform the reaction continuously until it turns red again. '
+          'During red phases, behave normally. '
+          'Each session starts with a red phase, and no button press is needed in this mode.',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_2.png',
     },
   ];
@@ -76,11 +76,9 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 🔹 Obere Leiste mit "X"-Button und Überschrift
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Zurück-Button oder "X"
                   IconButton(
                     icon: const Icon(Icons.close, size: 28),
                     onPressed: _exitScreen,
@@ -89,7 +87,7 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                   Expanded(
                     child: Center(
                       child: Text(
-                        'Erklärung',
+                        'Getting started',
                         style: Theme.of(context)
                             .textTheme
                             .headlineMedium
@@ -98,11 +96,11 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                     ),
                   ),
                   const SizedBox(
-                      width: 48), // Platzhalter für zentrierte Überschrift
+                    width: 48,
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
-
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
@@ -114,34 +112,35 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                   },
                   itemBuilder: (context, index) {
                     final page = _pages[index];
+                    final imagePath = page['image'];
                     return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
                             page['text']!,
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 16,
                               height: 1.6,
                             ),
                           ),
                         ),
                         const SizedBox(height: 32),
-                        Expanded(
-                          child: Image.asset(
-                            page['image']!,
-                            fit: BoxFit.contain,
-                            width: double.infinity,
+                        if (imagePath != null && imagePath.isNotEmpty)
+                          Expanded(
+                            child: Image.asset(
+                              page['image']!,
+                              fit: BoxFit.contain,
+                              width: double.infinity,
+                            ),
                           ),
-                        ),
                       ],
                     );
                   },
                 ),
               ),
-
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
