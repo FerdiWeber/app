@@ -3,7 +3,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 
-// Importiere deine neuen Manager- und Logger-Klassen
+import 'package:open_wearable/apps/allergy_symptom_tracker/view/symptom_survey.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/controller/manager.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/config.dart';
@@ -22,6 +22,7 @@ class StudyRunner extends StatefulWidget {
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
   final String experimentId;
+  final SurveyResults surveyResults;
 
   const StudyRunner({
     super.key,
@@ -31,6 +32,7 @@ class StudyRunner extends StatefulWidget {
     required this.leftConfigProvider,
     required this.rightConfigProvider,
     required this.experimentId,
+    required this.surveyResults,
   });
 
   @override
@@ -90,6 +92,26 @@ class _StudyRunnerState extends State<StudyRunner> {
 
     // Starte das Logging für diese Messung
     await _logger.startLogging(recordingId, false);
+
+    if (_measuringStepCounter == 1) {
+      print("Logging survey results...");
+      // Wir verwenden logOtherEvent, um die Survey-Daten zu speichern
+      for (var symptom in widget.surveyResults.entries) {
+        String symptomName = symptom.key;
+        int familiar = symptom.value['familiar']!;
+        int frequent = symptom.value['frequent']!;
+
+        // Logge jedes Symptom als eigenes Event
+        _logger.logOtherEvent(
+          0, // 0, da es quasi vor dem ersten Schritt passiert
+          "SurveyResults",
+          symptomName,
+          "familiar: $familiar, frequent: $frequent",
+        );
+      }
+      print("Survey results logged.");
+    }
+
     _logger.logTaskStart(_currentIndex, step.heading, step.duration);
 
     // Konfiguriere und starte die Sensoren

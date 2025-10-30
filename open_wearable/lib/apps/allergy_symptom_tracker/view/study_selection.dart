@@ -12,6 +12,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:open_wearable/apps/allergy_symptom_tracker/controller/logger.dart';
 
+import 'symptom_survey.dart';
+
 class StudySelection extends StatefulWidget {
   // Hinzufügen der benötigten Parameter
   final Wearable leftWearable;
@@ -294,11 +296,13 @@ class _StudySelectionState extends State<StudySelection> {
                 const SizedBox(height: 20),
 
                 // Start-Button
+                // Start-Button
                 PlatformElevatedButton(
                   onPressed: (_selectedOption == null ||
                           _measurementController.text.isEmpty)
                       ? null
                       : () {
+                          // 1. Daten aus StudySelection sammeln
                           late final StudyProtocol selectedProtocol;
                           if (_selectedOption == "option1") {
                             selectedProtocol = Dataset1Protocol();
@@ -306,13 +310,15 @@ class _StudySelectionState extends State<StudySelection> {
                             selectedProtocol = Dataset2Protocol();
                           }
 
-                          // Navigate to ExplanationScreen and pass ALL data
+                          // 2. Navigiere zum ExplanationScreen
                           Navigator.push(
                             context,
                             platformPageRoute(
                               context: context,
                               builder: (_) => ExplanationScreen(
-                                nextScreen: StudyRunner(
+                                // 3. Als 'nextScreen' übergeben wir den SurveyScreen
+                                nextScreen: SymptomSurveyScreen(
+                                  // 4. Wir reichen ALLE Daten an den SurveyScreen weiter
                                   protocol: selectedProtocol,
                                   experimentId: _measurementController.text,
                                   leftWearable: widget.leftWearable,
