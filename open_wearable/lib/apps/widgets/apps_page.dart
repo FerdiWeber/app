@@ -31,15 +31,17 @@ List<AppInfo> _apps = [
     logoPath: "lib/apps/posture_tracker/assets/logo.png",
     title: "Posture Tracker",
     description: "Get feedback on bad posture",
-    widget: SelectEarableView(startApp: (wearable, sensorConfigProvider) {
-      return PostureTrackerView(
-        EarableAttitudeTracker(
-          wearable as SensorManager,
-          sensorConfigProvider,
-          wearable.name.endsWith("L"),
-        ),
-      );
-    },),
+    widget: SelectEarableView(
+      startApp: (wearable, sensorConfigProvider) {
+        return PostureTrackerView(
+          EarableAttitudeTracker(
+            wearable as SensorManager,
+            sensorConfigProvider,
+            wearable.name.endsWith("L"),
+          ),
+        );
+      },
+    ),
   ),
   AppInfo(
     logoPath: "lib/apps/heart_tracker/assets/logo.png",
@@ -50,8 +52,10 @@ List<AppInfo> _apps = [
         if (wearable is SensorManager) {
           //TODO: show alert if no ppg sensor is found
           Sensor ppgSensor = (wearable as SensorManager).sensors.firstWhere(
-            (s) => s.sensorName.toLowerCase() == "photoplethysmography".toLowerCase(),
-          );
+                (s) =>
+                    s.sensorName.toLowerCase() ==
+                    "photoplethysmography".toLowerCase(),
+              );
 
           return HeartTrackerPage(ppgSensor: ppgSensor);
         }
@@ -70,7 +74,8 @@ List<AppInfo> _apps = [
     logoPath: "lib/apps/allergy_symptom_tracker/assets/logo.png",
     title: "Allergy Symptom Tracker",
     description: "Measure different kind of reactions to allergy symptoms",
-    widget: AllergySymptomTrackerApp(),//fy for easier debugging, correct code is below
+    widget:
+        AllergySymptomTrackerApp(), //fy for easier debugging, correct code is below
     /*widget: SelectEarableView(startApp: (wearable, sensorConfigProvider) {
       return StudySelection();
     },),*/
@@ -86,7 +91,7 @@ class AppsPage extends StatelessWidget {
       appBar: PlatformAppBar(
         title: PlatformText("Apps"),
         trailingActions: [
-            PlatformIconButton(
+          PlatformIconButton(
             icon: Icon(context.platformIcons.bluetooth),
             onPressed: () {
               if (Theme.of(context).platform == TargetPlatform.iOS) {

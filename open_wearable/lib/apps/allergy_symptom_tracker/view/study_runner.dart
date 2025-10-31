@@ -14,6 +14,8 @@ import 'package:open_wearable/apps/allergy_symptom_tracker/view/instruction_scre
 import 'package:open_wearable/apps/allergy_symptom_tracker/view/measuring_screen.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/view/study_selection.dart';
 
+import 'package:open_wearable/apps/allergy_symptom_tracker/view/repeat_screen.dart';
+
 class StudyRunner extends StatefulWidget {
   final StudyProtocol protocol;
 
@@ -42,7 +44,11 @@ class StudyRunner extends StatefulWidget {
 class _StudyRunnerState extends State<StudyRunner> {
   late final List<StudyStep> _steps;
   int _currentIndex = 0;
+
+  // Zählt jetzt nur noch *erfolgreich abgeschlossene* Messungen
   int _measuringStepCounter = 0;
+
+  bool _isConfirming = false;
 
   // Instanzen für Manager und Logger
   late final ExperimentManager _manager;
@@ -62,17 +68,10 @@ class _StudyRunnerState extends State<StudyRunner> {
 
   // Lädt die YAML und initialisiert den Manager
   Future<void> _loadConfigAndInitManager() async {
-    // Pfad zur YAML-Datei (muss in pubspec.yaml registriert sein)
     const String configPath =
         'lib/apps/allergy_symptom_tracker/assets/sensor_config.yaml';
-
-    // "seed" wird in config.dart für die Randomisierung von Blöcken verwendet.
-    // Wir verwenden hier die experimentId, um eine konsistente (aber pro ID einzigartige) Randomisierung zu erhalten.
     final seed = widget.experimentId;
-
     _expConfig = await ExperimentConfig.fromFile(configPath, seed);
-
-    // Initialisiere den Manager, SOBALD die Config geladen ist
     _manager = ExperimentManager(
       logger: _logger,
       expConfig: _expConfig,
@@ -84,16 +83,17 @@ class _StudyRunnerState extends State<StudyRunner> {
   }
 
   Future<void> _startMeasuring(String recordingId) async {
-    setState(() {
-      _measuringStepCounter++;
-    });
+    // setState(() {
+    //   _measuringStepCounter++; // HIER ENTFERNT!
+    // });
 
     final step = _steps[_currentIndex];
 
     // Starte das Logging für diese Messung
     await _logger.startLogging(recordingId, false);
 
-    if (_measuringStepCounter == 1) {
+    // Wird jetzt nur vor der ALLERERSTEN Messung (counter = 0) ausgeführt
+    if (_measuringStepCounter == 0) {
       print("Logging survey results...");
       // Wir verwenden logOtherEvent, um die Survey-Daten zu speichern
       for (var symptom in widget.surveyResults.entries) {
@@ -121,15 +121,44 @@ class _StudyRunnerState extends State<StudyRunner> {
     print("Sensoren sind konfiguriert und Aufnahme gestartet!");
   }
 
-  Future<void> _stopMeasuring() async {
-    // Stoppe die Sensoren und das Logging
+  // NEU: Stoppt Sensoren und geht zum Bestätigungs-Screen
+  Future<void> _stopAndConfirm() async {
+    // 1. Stoppe die Sensoren
     await _manager.deactivateSensors();
+    print("Sensoren gestoppt, warte auf Bestätigung...");
+
+    // 2. Setze den Flag, um den RepeatScreen anzuzeigen
+    setState(() {
+      _isConfirming = true;
+    });
+  }
+
+  // NEU: Speichert Daten und geht zum nächsten Schritt
+  Future<void> _saveAndAdvance() async {
+    // 1. Log-Task beenden und Daten schreiben
     _logger.logTaskEnd();
     await _logger.stopAndWriteLogging(false);
-    print("Aufnahme gestoppt und gespeichert!");
+    print("Aufnahme bestätigt und gespeichert!");
 
-    // Gehe zum nächsten Schritt
-    _nextStep();
+    // 2. Zurücksetzen, Zähler erhöhen und zum nächsten Schritt gehen
+    setState(() {
+      _isConfirming = false;
+      _measuringStepCounter++; // Zähler wird HIER erhöht
+      _nextStep(); // Geht zum nächsten _currentIndex
+    });
+  }
+
+  // NEU: Verwirft Daten (implizit) und wiederholt den Schritt
+  Future<void> _repeatMeasuringStep() async {
+    print("Aufnahme wird verworfen und wiederholt...");
+    // Daten werden implizit verworfen, da `stopAndWriteLogging` nie aufgerufen wurde.
+    // Beim nächsten `_startMeasuring` wird die (nie geschriebene) Log-Session überschrieben.
+
+    // Setze einfach den Flag zurück. Der build() zeigt jetzt wieder den
+    // MeasuringScreen mit demselben _currentIndex und _measuringStepCounter.
+    setState(() {
+      _isConfirming = false;
+    });
   }
 
   Future<void> _leaveStudy() async {
@@ -154,6 +183,8 @@ class _StudyRunnerState extends State<StudyRunner> {
     }
   }
 
+  // Diese Funktion wird jetzt nur noch für InstructionScreens
+  // und von _saveAndAdvance aufgerufen.
   void _nextStep() {
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
@@ -195,6 +226,7 @@ class _StudyRunnerState extends State<StudyRunner> {
       builder: (context, snapshot) {
         // Fall 1: Warten auf das Laden
         if (snapshot.connectionState == ConnectionState.waiting) {
+          // ... (unverändert) ...
           return PlatformScaffold(
             body: Center(
               child: PlatformCircularProgressIndicator(),
@@ -204,13 +236,14 @@ class _StudyRunnerState extends State<StudyRunner> {
 
         // Fall 2: Fehler beim Laden (z.B. YAML nicht gefunden)
         if (snapshot.hasError) {
+          // ... (unverändert) ...
           return PlatformScaffold(
             appBar: PlatformAppBar(title: Text("Fehler")),
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  "Fehler beim Laden der Konfiguration:\nStellen Sie sicher, dass '.../study_config.yaml' existiert und in pubspec.yaml registriert ist.\n\nFehlerdetails: ${snapshot.error}",
+                  "Fehler beim Laden der Konfiguration:\nStellen Sie sicher, dass '.../sensor_config.yaml' existiert und in pubspec.yaml registriert ist.\n\nFehlerdetails: ${snapshot.error}",
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -218,19 +251,32 @@ class _StudyRunnerState extends State<StudyRunner> {
           );
         }
 
-        // Fall 3: Erfolgreich geladen, zeige die normale UI
+        // NEU: Fall 3: Wir sind im Bestätigungs-Modus
+        if (_isConfirming) {
+          return RepeatScreen(
+            onRepeat: _repeatMeasuringStep,
+            onNext: _saveAndAdvance,
+            onLeaveStudy: _leaveStudy,
+          );
+        }
+
+        // Fall 4: Erfolgreich geladen, zeige die normale UI
         final step = _steps[_currentIndex];
 
         if (step.type == StudyStepType.instruction) {
           return InstructionScreen(
             heading: step.heading,
             description: step.description,
-            onNext: _nextStep,
+            onNext: _nextStep, // Instruction geht direkt weiter
             onLeaveStudy: _leaveStudy,
             pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
           );
         } else {
           final date = DateTime.now().toIso8601String().replaceAll(':', '-');
+
+          // Der _measuringStepCounter ändert sich jetzt erst NACH erfolgreicher Bestätigung.
+          // Beim Wiederholen bleibt der Counter gleich, aber das Datum ändert sich,
+          // was eine neue, eindeutige ID für den Wiederholungsversuch erstellt.
           final recordingId =
               "${widget.experimentId}_step${_measuringStepCounter + 1}_${step.heading.replaceAll(' ', '')}_$date";
 
@@ -241,17 +287,23 @@ class _StudyRunnerState extends State<StudyRunner> {
             logger: _logger,
             recordingId: recordingId,
             stepHeading: step.heading, // Wird für das Logging-Event benötigt
+
+            // Zeigt "Step 1", "Step 2" etc. basierend auf erfolgreichen Schritten
             measuringStepCounter: _measuringStepCounter + 1,
 
             onStart: () => _startMeasuring(recordingId),
-            onNext: _stopMeasuring,
+
+            // GEÄNDERT: Ruft die neue Bestätigungs-Funktion auf
+            onNext: _stopAndConfirm,
+
             onLeaveStudy: _leaveStudy,
             signalFrame: step.signalFrame,
             measuringTimes: step.measuringTimes,
             onActionButtonPressed: () {
               final currentStep = _steps[_currentIndex];
               _logger.logOtherEvent(
-                _measuringStepCounter,
+                // Zähler + 1, da er 0-basiert ist
+                _measuringStepCounter + 1,
                 currentStep.heading,
                 currentStep.heading,
                 "ActionButton_Pressed",
@@ -260,7 +312,8 @@ class _StudyRunnerState extends State<StudyRunner> {
             onSignalFrameChanged: (bool isGreen) {
               final currentStep = _steps[_currentIndex];
               _logger.logOtherEvent(
-                _measuringStepCounter,
+                // Zähler + 1, da er 0-basiert ist
+                _measuringStepCounter + 1,
                 currentStep.heading,
                 currentStep.heading,
                 isGreen ? "SignalFrame_Start" : "SignalFrame_Stop",

@@ -119,7 +119,7 @@ class InstructionScreen extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onLeaveStudy,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[700],
+                  backgroundColor: Colors.grey,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 40,
                     vertical: 16,
