@@ -37,7 +37,8 @@ class Dataset1Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Rub on the eyes",
-          description: "Rub or scratch your eyes with your hands. "
+          description: "Rub your eyes with your hands. "
+              "Try doing this once with only your right eye, once with only your left eye, and once with both eyes at the same time"
               "In this recording, there is no action button; the green frame indicates when you should perform the action. "
               "Perform the action throughout the entire green phase. "
               "Behave normally during the red phases.",

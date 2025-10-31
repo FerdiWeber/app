@@ -35,18 +35,15 @@ class SymptomSurveyScreen extends StatefulWidget {
 }
 
 class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
-  // NEU: Zustand für die allgemeine Frage
   bool? _hadHayFever;
 
-  // NEU: Die aktualisierte Symptom-Liste
-  // (Tippfehler von dir korrigiert, z.B. "screythcy" -> "Scratchy")
   final List<String> _symptoms = [
-    'Swallowing',
-    'Scratchy Palate',
-    'Scratchy Eyes',
+    'Globus sensation',
+    'Itchy palate',
+    'Itchy eyes',
     'Cough',
-    'Scratchy Ears',
-    'Clearing Throat'
+    'Itchy ears',
+    'Frequent throat clearing',
   ];
 
   // Map zur Speicherung der Antworten

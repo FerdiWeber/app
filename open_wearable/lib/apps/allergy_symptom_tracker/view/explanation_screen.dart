@@ -21,9 +21,10 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
     {
       'text': 'This study uses the OpenEarables to measure possible reactions to allergy symptoms. '
           'It aims to evaluate how well the built-in sensors can detect these reactions. '
-          'The app will guide you step by step through the process. '
-          'First, you’ll answer a few questions about your symptoms. Then, the actual recording begins. '
-          'Before each session, you’ll get clear instructions — read them carefully, then start recording. '
+          'You will first complete a short survey about hay fever symptoms. '
+          'The app will then guide you step by step through the recording process. '
+          'Before each session, you’ll receive clear instructions — read them carefully, then start recording. '
+          'If something goes wrong, you can repeat the recording. '
           'Try to behave as naturally as possible during each session. '
           'There are two types of recordings, which differ in how your actions are marked. Both are explained on the next pages.',
     },
@@ -129,11 +130,15 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                         ),
                         const SizedBox(height: 32),
                         if (imagePath != null && imagePath.isNotEmpty)
-                          Expanded(
-                            child: Image.asset(
-                              page['image']!,
-                              fit: BoxFit.contain,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              height: 380, // fixe Höhe für beide Screenshots
                               width: double.infinity,
+                              child: Image.asset(
+                                page['image']!,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                       ],
