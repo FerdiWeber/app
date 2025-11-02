@@ -24,7 +24,6 @@ class StudyRunner extends StatefulWidget {
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
   final String experimentId;
-  final SurveyResults surveyResults;
 
   const StudyRunner({
     super.key,
@@ -34,7 +33,6 @@ class StudyRunner extends StatefulWidget {
     required this.leftConfigProvider,
     required this.rightConfigProvider,
     required this.experimentId,
-    required this.surveyResults,
   });
 
   @override
@@ -83,34 +81,12 @@ class _StudyRunnerState extends State<StudyRunner> {
   }
 
   Future<void> _startMeasuring(String recordingId) async {
-    // setState(() {
-    //   _measuringStepCounter++; // HIER ENTFERNT!
-    // });
-
     final step = _steps[_currentIndex];
 
     // Starte das Logging für diese Messung
     await _logger.startLogging(recordingId, false);
 
-    // Wird jetzt nur vor der ALLERERSTEN Messung (counter = 0) ausgeführt
-    if (_measuringStepCounter == 0) {
-      print("Logging survey results...");
-      // Wir verwenden logOtherEvent, um die Survey-Daten zu speichern
-      for (var symptom in widget.surveyResults.entries) {
-        String symptomName = symptom.key;
-        int familiar = symptom.value['familiar']!;
-        int frequent = symptom.value['frequent']!;
-
-        // Logge jedes Symptom als eigenes Event
-        _logger.logOtherEvent(
-          0, // 0, da es quasi vor dem ersten Schritt passiert
-          "SurveyResults",
-          symptomName,
-          "familiar: $familiar, frequent: $frequent",
-        );
-      }
-      print("Survey results logged.");
-    }
+    // !!! DER SURVEY-BLOCK WIRD VON HIER ENTFERNT !!!
 
     _logger.logTaskStart(_currentIndex, step.heading, step.duration);
 

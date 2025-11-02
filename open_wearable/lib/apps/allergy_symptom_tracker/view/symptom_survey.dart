@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
+import 'package:open_wearable/apps/allergy_symptom_tracker/controller/logger.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.dart';
 import 'study_runner.dart';
@@ -116,42 +117,68 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
               ),
               // Der Button ist nur klickbar, wenn die Umfrage komplett ist
               onPressed: _isSurveyComplete()
-                  ? () {
-                      // 1. Wandle die Symptom-Antworten um
+                  ? () async {
+                      // 1. Wandle die Antworten um (wie bisher)
                       final SurveyResults results =
                           _answers.map((symptom, questions) {
                         return MapEntry(symptom, questions.map((key, value) {
-                          return MapEntry(key,
-                              value!); // value! ist sicher dank _isSurveyComplete
+                          return MapEntry(key, value!);
                         }));
                       });
-
-                      // 2. NEU: Füge die allgemeine Frage zu den Ergebnissen hinzu
-                      // (Wir kodieren bool als int, um dem 'SurveyResults'-Typ zu entsprechen)
                       results['general'] = {
-                        'hadHayFever': _hadHayFever! ? 1 : 0
+                        'hadHayFever': _hadHayFever! ? 1 : 0,
                       };
 
-                      // 3. Navigiere zum StudyRunner und übergebe ALLE Daten
-                      Navigator.pushReplacement(
-                        context,
-                        platformPageRoute(
-                          context: context,
-                          builder: (_) => StudyRunner(
-                            // Daten aus dem Survey-Konstruktor
-                            protocol: widget.protocol,
-                            experimentId: widget.experimentId,
-                            leftWearable: widget.leftWearable,
-                            rightWearable: widget.rightWearable,
-                            leftConfigProvider: widget.leftConfigProvider,
-                            rightConfigProvider: widget.rightConfigProvider,
-                            // Die gesammelten Ergebnisse
-                            surveyResults: results,
+                      // 2. Logge die Survey-Ergebnisse in eine eigene Datei
+                      final logger = ExperimentLogger();
+                      final date = null;
+                      final prefix = '${widget.experimentId}_survey_${date}_';
+                      await logger.startLogging(prefix, false);
+
+                      for (var entry in results.entries) {
+                        final symptom = entry.key;
+                        final data = entry.value;
+
+                        if (symptom == 'general') {
+                          logger.logOtherEvent(
+                            0,
+                            "SurveyResults",
+                            symptom,
+                            "hadHayFever: ${data['hadHayFever']}",
+                          );
+                        } else {
+                          logger.logOtherEvent(
+                            0,
+                            "SurveyResults",
+                            symptom,
+                            "familiarity: ${data['familiarity']}, frequency: ${data['frequency']}",
+                          );
+                        }
+                      }
+
+                      await logger.stopAndWriteLogging(false);
+                      print("✅ Survey results saved to separate CSV file.");
+
+                      // 3. Navigiere danach weiter zum StudyRunner
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          platformPageRoute(
+                            context: context,
+                            builder: (_) => StudyRunner(
+                              protocol: widget.protocol,
+                              experimentId: widget.experimentId,
+                              leftWearable: widget.leftWearable,
+                              rightWearable: widget.rightWearable,
+                              leftConfigProvider: widget.leftConfigProvider,
+                              rightConfigProvider: widget.rightConfigProvider,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     }
-                  : null, // Deaktiviert den Button, wenn 'null'
+                  : null,
+// Deaktiviert den Button, wenn 'null'
               child: const Text('Continue'),
             ),
           ),
