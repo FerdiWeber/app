@@ -137,12 +137,20 @@ class _StudyRunnerState extends State<StudyRunner> {
     });
   }
 
-  Future<void> _leaveStudy() async {
+  Future<void> _leaveStudy(bool needToSafe) async {
     // Stoppe die Sensoren (ohne die aktuellen Daten zu speichern)
     await _manager.deactivateSensors();
-    print("Studie abgebrochen, Sensoren deaktiviert.");
 
-    // Navigiere zurück zum StudySelection-Screen
+    if (needToSafe) {
+      try {
+        _logger.logTaskEnd();
+        await _logger.stopAndWriteLogging(false);
+        print("Letzte Log-Datei gespeichert (Abbruch).");
+      } catch (e) {
+        print("Fehler beim Speichern der Log-Datei beim Abbruch: $e");
+      }
+    }
+
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
         platformPageRoute(
@@ -232,7 +240,7 @@ class _StudyRunnerState extends State<StudyRunner> {
           return RepeatScreen(
             onRepeat: _repeatMeasuringStep,
             onNext: _saveAndAdvance,
-            onLeaveStudy: _leaveStudy,
+            onLeaveStudy: () => _leaveStudy(false),
           );
         }
 
@@ -244,7 +252,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             heading: step.heading,
             description: step.description,
             onNext: _nextStep, // Instruction geht direkt weiter
-            onLeaveStudy: _leaveStudy,
+            onLeaveStudy: () => _leaveStudy(false),
             pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
           );
         } else {
@@ -272,7 +280,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             // GEÄNDERT: Ruft die neue Bestätigungs-Funktion auf
             onNext: _stopAndConfirm,
 
-            onLeaveStudy: _leaveStudy,
+            onLeaveStudy: () => _leaveStudy(true),
             signalFrame: step.signalFrame,
             measuringTimes: step.measuringTimes,
             onActionButtonPressed: () {
