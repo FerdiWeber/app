@@ -30,7 +30,7 @@ class Dataset1Protocol extends StudyProtocol {
         ),
         StudyStep(
           type: StudyStepType.measuring,
-          duration: 30,
+          duration: 34,
           signalFrame: true,
           measuringTimes: [2, 5],
         ),
@@ -45,17 +45,16 @@ class Dataset1Protocol extends StudyProtocol {
         ),
         StudyStep(
           type: StudyStepType.measuring,
-          duration: 30,
+          duration: 34,
           signalFrame: true,
           measuringTimes: [2, 5],
         ),
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Coughing",
-          description: "In this step, you should cough. "
-              "In this recording, there is no action button; the green frame indicates when you should perform the action. "
-              "Perform the action throughout the entire green phase. "
-              "Behave normally during the red phases.",
+          description:
+              "During the recording, try to cough at regular intervals. "
+              "Press the action button immediately at the beginning of swallowing.",
         ),
         StudyStep(
           type: StudyStepType.measuring,
@@ -73,7 +72,7 @@ class Dataset1Protocol extends StudyProtocol {
         ),
         StudyStep(
           type: StudyStepType.measuring,
-          duration: 30,
+          duration: 34,
           signalFrame: true,
           measuringTimes: [2, 5],
         ),
