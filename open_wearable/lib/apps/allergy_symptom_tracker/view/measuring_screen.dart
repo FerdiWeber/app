@@ -230,15 +230,8 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     _colorTimer?.cancel();
     _phaseTimer?.cancel();
 
-    if (_cameraController != null &&
-        _cameraController!.value.isRecordingVideo) {
-      try {
-        await _cameraController!.stopVideoRecording();
-        debugPrint("Videoaufnahme (Abbruch) gestoppt.");
-      } catch (e) {
-        debugPrint("Fehler beim Stoppen der Videoaufnahme (Abbruch): $e");
-      }
-    }
+    await _stopVideoRecording();
+
     _cameraController?.dispose();
 
     widget.onLeaveStudy();
