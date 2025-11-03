@@ -32,7 +32,7 @@ class Dataset1Protocol extends StudyProtocol {
           type: StudyStepType.measuring,
           duration: 30,
           signalFrame: true,
-          measuringTimes: [2, 4],
+          measuringTimes: [2, 5],
         ),
         StudyStep(
           type: StudyStepType.instruction,
@@ -47,7 +47,7 @@ class Dataset1Protocol extends StudyProtocol {
           type: StudyStepType.measuring,
           duration: 30,
           signalFrame: true,
-          measuringTimes: [2, 4],
+          measuringTimes: [2, 5],
         ),
         StudyStep(
           type: StudyStepType.instruction,
@@ -60,8 +60,7 @@ class Dataset1Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.measuring,
           duration: 30,
-          signalFrame: true,
-          measuringTimes: [1, 4],
+          actionButton: true,
         ),
         StudyStep(
           type: StudyStepType.instruction,
@@ -76,7 +75,7 @@ class Dataset1Protocol extends StudyProtocol {
           type: StudyStepType.measuring,
           duration: 30,
           signalFrame: true,
-          measuringTimes: [2, 3],
+          measuringTimes: [2, 5],
         ),
         StudyStep(
           type: StudyStepType.instruction,
