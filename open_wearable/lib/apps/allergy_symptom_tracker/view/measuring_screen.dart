@@ -13,6 +13,7 @@ class MeasuringScreen extends StatefulWidget {
   final bool actionButton;
   final bool signalFrame;
   final List<int> measuringTimes;
+  final bool debugMode;
 
   final ExperimentLogger logger;
   final String recordingId;
@@ -37,6 +38,7 @@ class MeasuringScreen extends StatefulWidget {
     required this.measuringStepCounter,
     this.onActionButtonPressed,
     this.onSignalFrameChanged,
+    this.debugMode = false,
   });
 
   @override
@@ -347,45 +349,47 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                                   ),
                                 ),
                               ),
-                            SizedBox(
-                              height: 55,
-                              child: ElevatedButton(
-                                onPressed: _cancelAndNext,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                            if (widget.debugMode) ...[
+                              SizedBox(
+                                height: 55,
+                                child: ElevatedButton(
+                                  onPressed: _cancelAndNext,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
-                                ),
-                                child: const Text(
-                                  "Skip",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              height: 55,
-                              child: ElevatedButton(
-                                onPressed: _cancelAndLeave,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: const Text(
-                                  "Leave Study",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
+                                  child: const Text(
+                                    "Skip",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                height: 55,
+                                child: ElevatedButton(
+                                  onPressed: _cancelAndLeave,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.grey,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Leave Study",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ]
                           ],
                         ),
                       ),

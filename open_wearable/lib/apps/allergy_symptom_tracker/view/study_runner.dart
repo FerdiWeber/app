@@ -254,6 +254,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             onNext: _nextStep, // Instruction geht direkt weiter
             onLeaveStudy: () => _leaveStudy(false),
             pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
+            debugMode: step.debugMode,
           );
         } else {
           final date = DateTime.now().toIso8601String().replaceAll(':', '-');
@@ -267,6 +268,7 @@ class _StudyRunnerState extends State<StudyRunner> {
           return MeasuringScreen(
             duration: step.duration,
             actionButton: step.actionButton,
+            debugMode: step.debugMode,
 
             logger: _logger,
             recordingId: recordingId,

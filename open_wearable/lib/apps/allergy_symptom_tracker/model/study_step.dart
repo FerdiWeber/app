@@ -11,6 +11,7 @@ class StudyStep {
   final bool actionButton;
   final bool signalFrame;
   final List<int> measuringTimes;
+  final bool debugMode;
 
   StudyStep({
     required this.type,
@@ -21,5 +22,6 @@ class StudyStep {
     this.actionButton = false,
     this.signalFrame = false,
     this.measuringTimes = const [0, 0],
+    this.debugMode = false,
   });
 }

@@ -13,11 +13,13 @@ class Dataset1Protocol extends StudyProtocol {
           description:
               "During the recording, try to swallow at regular intervals. "
               "Press the action button immediately at the beginning of swallowing.",
+          debugMode: true,
         ),
         StudyStep(
           type: StudyStepType.measuring,
           duration: 30,
           actionButton: true,
+          debugMode: true,
         ),
         StudyStep(
           type: StudyStepType.instruction,

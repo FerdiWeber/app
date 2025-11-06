@@ -6,6 +6,7 @@ class InstructionScreen extends StatelessWidget {
   final String? pathToImage;
   final VoidCallback onNext;
   final VoidCallback onLeaveStudy;
+  final bool debugMode;
 
   const InstructionScreen({
     super.key,
@@ -14,6 +15,7 @@ class InstructionScreen extends StatelessWidget {
     required this.onNext,
     required this.onLeaveStudy,
     this.pathToImage,
+    this.debugMode = false,
   });
 
   @override
@@ -114,26 +116,28 @@ class InstructionScreen extends StatelessWidget {
             const SizedBox(height: 12), // Abstand
 
             // 5. 'SizedBox' sorgt für die volle Breite
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onLeaveStudy,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 16,
+            if (debugMode) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onLeaveStudy,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  child: const Text(
+                    "Leave Study",
+                    style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
-                ),
-                child: const Text(
-                  "Leave Study",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),

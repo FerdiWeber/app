@@ -39,7 +39,7 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
   bool? _hadHayFever;
 
   final List<String> _symptoms = [
-    'Globus sensation',
+    'Urge to swallow',
     'Itchy palate',
     'Itchy eyes',
     'Cough',
