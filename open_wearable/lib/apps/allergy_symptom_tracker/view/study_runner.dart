@@ -285,6 +285,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             onLeaveStudy: () => _leaveStudy(true),
             signalFrame: step.signalFrame,
             measuringTimes: step.measuringTimes,
+            measuringInstructions: step.measuringInstructions,
             onActionButtonPressed: () {
               final currentStep = _steps[_currentIndex];
               _logger.logOtherEvent(

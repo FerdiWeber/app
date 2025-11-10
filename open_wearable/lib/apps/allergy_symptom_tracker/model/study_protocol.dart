@@ -29,12 +29,17 @@ class Dataset1Protocol extends StudyProtocol {
               "In this recording, there is no action button; the green frame indicates when you should perform the action. "
               "Perform the action throughout the entire green phase. "
               "Behave normally during the red phases.",
+          debugMode: true,
         ),
         StudyStep(
           type: StudyStepType.measuring,
           duration: 31,
           signalFrame: true,
           measuringTimes: [2, 5],
+          measuringInstructions: [
+            "Get ready to scratch your palate",
+            "Keep scratching yout palate",
+          ],
         ),
         StudyStep(
           type: StudyStepType.instruction,
@@ -44,12 +49,23 @@ class Dataset1Protocol extends StudyProtocol {
               "In this recording, there is no action button; the green frame indicates when you should perform the action. "
               "Perform the action throughout the entire green phase. "
               "Behave normally during the red phases.",
+          debugMode: true,
         ),
         StudyStep(
           type: StudyStepType.measuring,
           duration: 31,
           signalFrame: true,
           measuringTimes: [2, 5],
+          measuringInstructions: [
+            "Get ready to rub your left eye",
+            "rub your left eye",
+            "Get ready to rub your right eye",
+            "rub your right eye",
+            "Get ready to rub both your eyey",
+            "rub both your eyes",
+            "get ready to rub both your eyes",
+            "rub both your eyes",
+          ],
         ),
         StudyStep(
           type: StudyStepType.instruction,

@@ -11,6 +11,7 @@ class StudyStep {
   final bool actionButton;
   final bool signalFrame;
   final List<int> measuringTimes;
+  final List<String> measuringInstructions;
   final bool debugMode;
 
   StudyStep({
@@ -22,6 +23,7 @@ class StudyStep {
     this.actionButton = false,
     this.signalFrame = false,
     this.measuringTimes = const [0, 0],
+    this.measuringInstructions = const [""],
     this.debugMode = false,
   });
 }

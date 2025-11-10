@@ -13,6 +13,7 @@ class MeasuringScreen extends StatefulWidget {
   final bool actionButton;
   final bool signalFrame;
   final List<int> measuringTimes;
+  final List<String> measuringInstructions;
   final bool debugMode;
 
   final ExperimentLogger logger;
@@ -32,6 +33,7 @@ class MeasuringScreen extends StatefulWidget {
     required this.actionButton,
     required this.signalFrame,
     required this.measuringTimes,
+    required this.measuringInstructions,
     required this.logger,
     required this.recordingId,
     required this.stepHeading,
@@ -253,6 +255,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   @override
   Widget build(BuildContext context) {
     final int displayTime = widget.signalFrame ? _phaseRemaining : _remaining;
+    final int instructionIndex =
+        (_cycleIndex - 1) % widget.measuringInstructions.length;
+    final String currentInstruction =
+        _showPreCountdown ? "" : widget.measuringInstructions[instructionIndex];
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -303,6 +309,18 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: Text(
+                          currentInstruction,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(top: 40.0),
                         child: Text(
