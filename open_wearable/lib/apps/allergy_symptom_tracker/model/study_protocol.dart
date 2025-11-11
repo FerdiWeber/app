@@ -19,7 +19,6 @@ class Dataset1Protocol extends StudyProtocol {
           type: StudyStepType.measuring,
           duration: 30,
           actionButton: true,
-          debugMode: true,
         ),
         StudyStep(
           type: StudyStepType.instruction,

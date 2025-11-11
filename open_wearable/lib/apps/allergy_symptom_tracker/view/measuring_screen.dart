@@ -22,6 +22,7 @@ class MeasuringScreen extends StatefulWidget {
   final int measuringStepCounter;
 
   final VoidCallback? onActionButtonPressed;
+  final VoidCallback? onActionButtonReleased;
   final Function(bool isGreen)? onSignalFrameChanged;
 
   const MeasuringScreen({
@@ -39,6 +40,7 @@ class MeasuringScreen extends StatefulWidget {
     required this.stepHeading,
     required this.measuringStepCounter,
     this.onActionButtonPressed,
+    this.onActionButtonReleased,
     this.onSignalFrameChanged,
     this.debugMode = false,
   });
@@ -306,68 +308,112 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                 child: Container(
                   width: double.infinity,
                   color: Colors.white,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Stack(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: Text(
-                          currentInstruction,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 40.0),
-                        child: Text(
-                          '$displayTime s',
-                          style: const TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
+                      SizedBox(
+                        width: double.infinity,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            if (widget.actionButton)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: OutlinedButton(
-                                  onPressed: () {
-                                    widget.onActionButtonPressed?.call();
-                                    debugPrint("Action button pressed!");
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(
-                                      color: Colors.green,
-                                      width: 3,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 20,
-                                    ),
-                                    shape: RoundedRectangleBorder(
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: widget.actionButton ? 0 : 110,
+                              ),
+                              child: Text(
+                                currentInstruction,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 40.0),
+                              child: Text(
+                                '$displayTime s',
+                                style: const TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // --- TEIL 2: Dein Action Button (fixiert positioniert) ---
+                      if (widget.actionButton)
+                        Align(
+                          alignment: Alignment(0.0, 0.37),
+                          child: SizedBox(
+                            height: 230,
+                            width: 350,
+                            child: Listener(
+                              onPointerDown: (_) {
+                                widget.onActionButtonPressed?.call();
+                              },
+                              onPointerUp: (_) {
+                                widget.onActionButtonReleased?.call();
+                              },
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (Set<WidgetState> states) {
+                                      if (states
+                                          .contains(WidgetState.pressed)) {
+                                        return Colors.green[900]!;
+                                      }
+                                      return Colors.green;
+                                    },
+                                  ),
+                                  foregroundColor:
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (Set<WidgetState> states) {
+                                      if (states
+                                          .contains(WidgetState.pressed)) {
+                                        return Colors.green;
+                                      }
+                                      return Colors.white;
+                                    },
+                                  ),
+                                  shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                   ),
-                                  child: const Text(
-                                    "Action",
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green,
-                                    ),
+                                  padding: MaterialStateProperty.all(
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Action",
+                                  style: TextStyle(
+                                    fontSize: 33,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
-                            if (widget.debugMode) ...[
+                            ),
+                          ),
+                        ),
+
+                      // --- TEIL 3: Deine Debug-Buttons (fixiert unten) ---
+                      if (widget.debugMode)
+                        Positioned(
+                          // 3. Positioniert die Debug-Buttons ganz unten
+                          bottom: 20.0, // 20 Pixel Abstand vom Boden
+                          left: 20.0, // 20 Pixel Abstand links
+                          right: 20.0, // 20 Pixel Abstand rechts
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
                               SizedBox(
                                 height: 55,
                                 child: ElevatedButton(
@@ -407,14 +453,13 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                                   ),
                                 ),
                               ),
-                            ]
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
-              ),
+              )
             ],
           ),
 

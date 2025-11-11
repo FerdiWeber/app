@@ -296,6 +296,16 @@ class _StudyRunnerState extends State<StudyRunner> {
                 "ActionButton_Pressed",
               );
             },
+            onActionButtonReleased: () {
+              final currentStep = _steps[_currentIndex];
+              _logger.logOtherEvent(
+                // Zähler + 1, da er 0-basiert ist
+                _measuringStepCounter + 1,
+                currentStep.heading,
+                currentStep.heading,
+                "ActionButton_Released",
+              );
+            },
             onSignalFrameChanged: (bool isGreen) {
               final currentStep = _steps[_currentIndex];
               _logger.logOtherEvent(
