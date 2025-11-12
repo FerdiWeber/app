@@ -7,7 +7,9 @@ class StudyStep {
   final String heading;
   final String pathToImage;
   final String description;
+  final String practiceText;
   final int duration;
+  final int repetitions;
   final bool actionButton;
   final bool signalFrame;
   final List<int> measuringTimes;
@@ -19,7 +21,9 @@ class StudyStep {
     this.heading = "",
     this.pathToImage = "",
     this.description = "",
+    this.practiceText = "",
     this.duration = 0,
+    this.repetitions = 1,
     this.actionButton = false,
     this.signalFrame = false,
     this.measuringTimes = const [0, 0],

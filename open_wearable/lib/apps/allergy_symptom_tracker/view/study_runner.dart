@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
+import 'package:open_wearable/apps/allergy_symptom_tracker/view/practice_screen.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 
 import 'package:open_wearable/apps/allergy_symptom_tracker/view/symptom_survey.dart';
@@ -42,6 +43,8 @@ class StudyRunner extends StatefulWidget {
 class _StudyRunnerState extends State<StudyRunner> {
   late final List<StudyStep> _steps;
   int _currentIndex = 0;
+  bool _showPractice = true;
+  int _repetitionCounter = 1;
 
   // Zählt jetzt nur noch *erfolgreich abgeschlossene* Messungen
   int _measuringStepCounter = 0;
@@ -116,11 +119,23 @@ class _StudyRunnerState extends State<StudyRunner> {
     await _logger.stopAndWriteLogging(false);
     print("Aufnahme bestätigt und gespeichert!");
 
-    // 2. Zurücksetzen, Zähler erhöhen und zum nächsten Schritt gehen
+    final currentStep = _steps[_currentIndex];
+    final maxRepetitions = currentStep.repetitions;
+
     setState(() {
       _isConfirming = false;
-      _measuringStepCounter++; // Zähler wird HIER erhöht
-      _nextStep(); // Geht zum nächsten _currentIndex
+      _measuringStepCounter++;
+
+      if (_repetitionCounter < maxRepetitions) {
+        // Es gibt noch Wiederholungen dieses Schritts
+        _repetitionCounter++;
+        _showPractice = false; // PracticeScreen nur beim ersten Mal
+      } else {
+        // Alle Wiederholungen abgeschlossen → nächster Schritt
+        _repetitionCounter = 1;
+        _showPractice = true;
+        _nextStep();
+      }
     });
   }
 
@@ -220,7 +235,6 @@ class _StudyRunnerState extends State<StudyRunner> {
 
         // Fall 2: Fehler beim Laden (z.B. YAML nicht gefunden)
         if (snapshot.hasError) {
-          // ... (unverändert) ...
           return PlatformScaffold(
             appBar: PlatformAppBar(title: Text("Fehler")),
             body: Center(
@@ -257,11 +271,18 @@ class _StudyRunnerState extends State<StudyRunner> {
             debugMode: step.debugMode,
           );
         } else {
+          if (_showPractice && _repetitionCounter == 1) {
+            return PracticeScreen(
+              practiceInstruction: step.practiceText,
+              onStartMeasurment: () {
+                setState(() {
+                  _showPractice = false;
+                });
+              },
+            );
+          }
           final date = DateTime.now().toIso8601String().replaceAll(':', '-');
 
-          // Der _measuringStepCounter ändert sich jetzt erst NACH erfolgreicher Bestätigung.
-          // Beim Wiederholen bleibt der Counter gleich, aber das Datum ändert sich,
-          // was eine neue, eindeutige ID für den Wiederholungsversuch erstellt.
           final recordingId =
               "${widget.experimentId}_step${_measuringStepCounter + 1}_${step.heading.replaceAll(' ', '')}_$date";
 
@@ -269,50 +290,37 @@ class _StudyRunnerState extends State<StudyRunner> {
             duration: step.duration,
             actionButton: step.actionButton,
             debugMode: step.debugMode,
-
             logger: _logger,
             recordingId: recordingId,
-            stepHeading: step.heading, // Wird für das Logging-Event benötigt
-
-            // Zeigt "Step 1", "Step 2" etc. basierend auf erfolgreichen Schritten
+            stepHeading: step.heading,
             measuringStepCounter: _measuringStepCounter + 1,
-
             onStart: () => _startMeasuring(recordingId),
-
-            // GEÄNDERT: Ruft die neue Bestätigungs-Funktion auf
             onNext: _stopAndConfirm,
-
             onLeaveStudy: () => _leaveStudy(true),
             signalFrame: step.signalFrame,
             measuringTimes: step.measuringTimes,
             measuringInstructions: step.measuringInstructions,
             onActionButtonPressed: () {
-              final currentStep = _steps[_currentIndex];
               _logger.logOtherEvent(
-                // Zähler + 1, da er 0-basiert ist
                 _measuringStepCounter + 1,
-                currentStep.heading,
-                currentStep.heading,
+                step.heading,
+                step.heading,
                 "ActionButton_Pressed",
               );
             },
             onActionButtonReleased: () {
-              final currentStep = _steps[_currentIndex];
               _logger.logOtherEvent(
-                // Zähler + 1, da er 0-basiert ist
                 _measuringStepCounter + 1,
-                currentStep.heading,
-                currentStep.heading,
+                step.heading,
+                step.heading,
                 "ActionButton_Released",
               );
             },
             onSignalFrameChanged: (bool isGreen) {
-              final currentStep = _steps[_currentIndex];
               _logger.logOtherEvent(
-                // Zähler + 1, da er 0-basiert ist
                 _measuringStepCounter + 1,
-                currentStep.heading,
-                currentStep.heading,
+                step.heading,
+                step.heading,
                 isGreen ? "SignalFrame_Start" : "SignalFrame_Stop",
               );
             },

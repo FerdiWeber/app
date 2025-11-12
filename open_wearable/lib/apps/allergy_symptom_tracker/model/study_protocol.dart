@@ -16,10 +16,12 @@ class Dataset1Protocol extends StudyProtocol {
           debugMode: true,
         ),
         StudyStep(
-          type: StudyStepType.measuring,
-          duration: 30,
-          actionButton: true,
-        ),
+            type: StudyStepType.measuring,
+            duration: 30,
+            actionButton: true,
+            repetitions: 3,
+            practiceText: "try now to swallow",
+            debugMode: true),
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Scratching movement on the palate",
@@ -39,6 +41,7 @@ class Dataset1Protocol extends StudyProtocol {
             "Get ready to scratch your palate",
             "Keep scratching yout palate",
           ],
+          repetitions: 3,
         ),
         StudyStep(
           type: StudyStepType.instruction,
