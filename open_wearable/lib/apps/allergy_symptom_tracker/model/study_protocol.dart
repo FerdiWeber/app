@@ -17,6 +17,7 @@ class Dataset1Protocol extends StudyProtocol {
         ),
         StudyStep(
             type: StudyStepType.measuring,
+            heading: "Swallowing",
             duration: 30,
             actionButton: true,
             repetitions: 3,

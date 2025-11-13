@@ -249,17 +249,18 @@ class _StudyRunnerState extends State<StudyRunner> {
           );
         }
 
-        // NEU: Fall 3: Wir sind im Bestätigungs-Modus
+        final step = _steps[_currentIndex];
+
         if (_isConfirming) {
           return RepeatScreen(
             onRepeat: _repeatMeasuringStep,
             onNext: _saveAndAdvance,
             onLeaveStudy: () => _leaveStudy(false),
+            stepHeading: step.heading,
+            repetition: _repetitionCounter,
+            maxRepetition: step.repetitions,
           );
         }
-
-        // Fall 4: Erfolgreich geladen, zeige die normale UI
-        final step = _steps[_currentIndex];
 
         if (step.type == StudyStepType.instruction) {
           return InstructionScreen(

@@ -5,16 +5,32 @@ class RepeatScreen extends StatelessWidget {
   final VoidCallback onRepeat;
   final VoidCallback onNext;
   final VoidCallback onLeaveStudy;
+  final String stepHeading;
+  final int repetition;
+  final int maxRepetition;
 
   const RepeatScreen({
     super.key,
     required this.onRepeat,
     required this.onNext,
     required this.onLeaveStudy,
+    required this.stepHeading,
+    required this.repetition,
+    required this.maxRepetition,
   });
 
   @override
   Widget build(BuildContext context) {
+    const String repeatHeader = "Did the recording work correctly?";
+    const String repeatText =
+        "If something went wrong (e.g., you coughed, sensors moved, or you got distracted), please repeat the recording.";
+
+    bool repetitionsLeft = repetition < maxRepetition;
+    int nextRepetition = repetition + 1;
+    String continueText = repetitionsLeft
+        ? 'Next Step will be recoring $nextRepetition out of $maxRepetition for  $stepHeading.'
+        : 'YOu have completed all recording steps for $stepHeading and the study will continue with the next symptom.';
+
     // Gemeinsamer Stil für beide Buttons
     final ButtonStyle baseButtonStyle = ElevatedButton.styleFrom(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -26,14 +42,14 @@ class RepeatScreen extends StatelessWidget {
 
     // Grau für "Next Step"
     final ButtonStyle nextButtonStyle = baseButtonStyle.copyWith(
-      backgroundColor: MaterialStateProperty.all(Colors.grey),
-      foregroundColor: MaterialStateProperty.all(Colors.white),
+      backgroundColor: WidgetStateProperty.all(Colors.grey),
+      foregroundColor: WidgetStateProperty.all(Colors.white),
     );
 
     // Rot für "Repeat"
     final ButtonStyle repeatButtonStyle = baseButtonStyle.copyWith(
-      backgroundColor: MaterialStateProperty.all(Colors.redAccent),
-      foregroundColor: MaterialStateProperty.all(Colors.white),
+      backgroundColor: WidgetStateProperty.all(Colors.redAccent),
+      foregroundColor: WidgetStateProperty.all(Colors.white),
     );
 
     return PlatformScaffold(
@@ -50,7 +66,7 @@ class RepeatScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start, // linksbündig
                   children: [
                     Text(
-                      "Did the recording work correctly?",
+                      repeatHeader,
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -59,7 +75,16 @@ class RepeatScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      "If something went wrong (e.g., you coughed, sensors moved, or you got distracted), please repeat the recording.",
+                      repeatText,
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      continueText,
                       textAlign: TextAlign.left,
                       style: const TextStyle(
                         fontSize: 16,
