@@ -163,10 +163,3 @@ class RepeatScreen extends StatelessWidget {
     );
   }
 }
-
-/*
-rub on eyes -eher längere messungen, aber keine 15 wiederholungen
-sniff - vlt eher action button, weil nur 1 sek könnte blöd ausshene, und länger ist unangenehm
-pumping - dauer
-
-Set 2 - halbe stunde */
