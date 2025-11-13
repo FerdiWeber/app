@@ -114,7 +114,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                     child: ElevatedButton(
                       onPressed: widget.onStartMeasurment,
                       style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(Colors.green),
+                        backgroundColor: WidgetStateProperty.all(Colors.grey),
                         shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
