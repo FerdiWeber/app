@@ -273,6 +273,10 @@ class _StudySelectionState extends State<StudySelection> {
                       value: "option2",
                       child: Text("Dataset 2"),
                     ),
+                    DropdownMenuItem(
+                      value: "option 3",
+                      child: Text("Dataset 3"),
+                    )
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -306,8 +310,10 @@ class _StudySelectionState extends State<StudySelection> {
                           late final StudyProtocol selectedProtocol;
                           if (_selectedOption == "option1") {
                             selectedProtocol = Dataset1Protocol();
-                          } else {
+                          } else if (_selectedOption == "option2") {
                             selectedProtocol = Dataset2Protocol();
+                          } else {
+                            selectedProtocol = Dataset3Protocol();
                           }
 
                           // 2. Navigiere zum ExplanationScreen
