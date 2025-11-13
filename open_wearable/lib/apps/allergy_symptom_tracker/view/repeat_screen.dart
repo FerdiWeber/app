@@ -29,7 +29,7 @@ class RepeatScreen extends StatelessWidget {
     int nextRepetition = repetition + 1;
     String continueText = repetitionsLeft
         ? 'Next Step will be recoring $nextRepetition out of $maxRepetition for  $stepHeading.'
-        : 'YOu have completed all recording steps for $stepHeading and the study will continue with the next symptom.';
+        : 'You have completed all recording steps for $stepHeading and the study will continue with the next symptom.';
 
     // Gemeinsamer Stil für beide Buttons
     final ButtonStyle baseButtonStyle = ElevatedButton.styleFrom(
@@ -163,3 +163,10 @@ class RepeatScreen extends StatelessWidget {
     );
   }
 }
+
+/*
+rub on eyes -eher längere messungen, aber keine 15 wiederholungen
+sniff - vlt eher action button, weil nur 1 sek könnte blöd ausshene, und länger ist unangenehm
+pumping - dauer
+
+Set 2 - halbe stunde */
