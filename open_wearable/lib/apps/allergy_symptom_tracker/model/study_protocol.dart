@@ -293,7 +293,7 @@ class Dataset2Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.measuring,
           heading: "Sniffing",
-          duration: 30,
+          duration: 31,
           signalFrame: true,
           measuringTimes: [2, 5],
           measuringInstructions: ["get ready to sniff", "now sniff"],
@@ -325,7 +325,7 @@ class Dataset2Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.measuring,
           heading: "Sniffing",
-          duration: 30,
+          duration: 31,
           signalFrame: true,
           measuringTimes: [2, 5],
           measuringInstructions: ["get ready to sniff", "now sniff"],
