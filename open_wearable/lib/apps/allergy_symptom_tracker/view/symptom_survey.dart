@@ -6,14 +6,10 @@ import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.dart';
 import 'study_runner.dart';
 
-// Typ-Definition für die Ergebnisse.
-// Passt immer noch:
-// 'general' -> {'hadHayFever': 1}
-// 'Cough' -> {'familiarity': 3, 'frequency': 2}
+// Typdefinition für die Ergebnisse
 typedef SurveyResults = Map<String, Map<String, int>>;
 
 class SymptomSurveyScreen extends StatefulWidget {
-  // Alle Parameter, die vom ExplanationScreen durchgereicht werden
   final StudyProtocol protocol;
   final String experimentId;
   final Wearable leftWearable;
@@ -22,14 +18,14 @@ class SymptomSurveyScreen extends StatefulWidget {
   final SensorConfigurationProvider rightConfigProvider;
 
   const SymptomSurveyScreen({
-    Key? key,
+    super.key,
     required this.protocol,
     required this.experimentId,
     required this.leftWearable,
     required this.rightWearable,
     required this.leftConfigProvider,
     required this.rightConfigProvider,
-  }) : super(key: key);
+  });
 
   @override
   State<SymptomSurveyScreen> createState() => _SymptomSurveyScreenState();
@@ -37,6 +33,7 @@ class SymptomSurveyScreen extends StatefulWidget {
 
 class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
   bool? _hadHayFever;
+  bool? _hasAllergySymptoms;
 
   final List<String> _symptoms = [
     'Urge to swallow',
@@ -47,38 +44,29 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
     'Frequent throat clearing',
   ];
 
-  // Map zur Speicherung der Antworten
-  // Struktur: { 'Cough': { 'familiarity': 1, 'frequency': 3 }, ... }
   late final Map<String, Map<String, int?>> _answers;
 
   @override
   void initState() {
     super.initState();
-    // Initialisiere die Antwort-Map mit 'null' für jedes Symptom
     _answers = {
       for (var symptom in _symptoms)
         symptom: {
-          'familiarity': null, // NEUER KEY
-          'frequency': null, // NEUER KEY
+          'familiarity': null,
+          'frequency': null,
         }
     };
   }
 
-  // Prüft, ob ALLE Fragen (auch die allgemeine) beantwortet wurden
   bool _isSurveyComplete() {
-    // 1. Prüfe die allgemeine Frage
-    if (_hadHayFever == null) {
-      return false;
-    }
-
-    // 2. Prüfe alle Symptom-Fragen
+    if (_hadHayFever == null || _hasAllergySymptoms == null) return false;
     for (var symptom in _symptoms) {
       if (_answers[symptom]!['familiarity'] == null ||
           _answers[symptom]!['frequency'] == null) {
-        return false; // Mindestens eine Antwort fehlt
+        return false;
       }
     }
-    return true; // Alle Antworten sind vorhanden
+    return true;
   }
 
   @override
@@ -86,50 +74,40 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Symptom Survey'),
-        // Hier ist der "Zurück"-Pfeil (wie zuletzt besprochen)
-        // Er wird automatisch angezeigt, da wir 'automaticallyImplyLeading: false' entfernt haben.
       ),
       body: Column(
         children: [
           Expanded(
-            // ListView stellt die Scrollbarkeit sicher
             child: ListView.builder(
               padding: const EdgeInsets.all(8.0),
-              // Die Anzahl der Symptome + 1 Platz für die allgemeine Frage
               itemCount: _symptoms.length + 1,
               itemBuilder: (context, index) {
-                // NEU: Der erste Eintrag (index 0) ist die allgemeine Frage
-                if (index == 0) {
-                  return _buildHayFeverCard();
-                }
-                // Alle folgenden Einträge sind die Symptom-Karten
+                if (index == 0) return _buildGeneralQuestionsCard();
                 final symptom = _symptoms[index - 1];
                 return _buildSymptomCard(symptom);
               },
             ),
           ),
-          // Der "Weiter"-Button am unteren Rand
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
-              // Der Button ist nur klickbar, wenn die Umfrage komplett ist
               onPressed: _isSurveyComplete()
                   ? () async {
-                      // 1. Wandle die Antworten um (wie bisher)
                       final SurveyResults results =
                           _answers.map((symptom, questions) {
                         return MapEntry(symptom, questions.map((key, value) {
                           return MapEntry(key, value!);
                         }));
                       });
+
                       results['general'] = {
                         'hadHayFever': _hadHayFever! ? 1 : 0,
+                        'hasAllergySymptoms': _hasAllergySymptoms! ? 1 : 0,
                       };
 
-                      // 2. Logge die Survey-Ergebnisse in eine eigene Datei
                       final logger = ExperimentLogger();
                       final date = null;
                       final prefix = '${widget.experimentId}_survey_${date}_';
@@ -138,13 +116,12 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
                       for (var entry in results.entries) {
                         final symptom = entry.key;
                         final data = entry.value;
-
                         if (symptom == 'general') {
                           logger.logOtherEvent(
                             0,
                             "SurveyResults",
                             symptom,
-                            "hadHayFever: ${data['hadHayFever']}",
+                            "hadHayFever: ${data['hadHayFever']}, hasAllergySymptoms: ${data['hasAllergySymptoms']}",
                           );
                         } else {
                           logger.logOtherEvent(
@@ -159,7 +136,6 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
                       await logger.stopAndWriteLogging(false);
                       print("✅ Survey results saved to separate CSV file.");
 
-                      // 3. Navigiere danach weiter zum StudyRunner
                       if (context.mounted) {
                         Navigator.pushReplacement(
                           context,
@@ -178,7 +154,6 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
                       }
                     }
                   : null,
-// Deaktiviert den Button, wenn 'null'
               child: const Text('Continue'),
             ),
           ),
@@ -187,8 +162,7 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
     );
   }
 
-  // NEU: Eine eigene Karte für die allgemeine Ja/Nein-Frage
-  Widget _buildHayFeverCard() {
+  Widget _buildGeneralQuestionsCard() {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
@@ -196,39 +170,28 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'General Question',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text('General Questions',
+                style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 16),
-            Text(
-              'Have you ever had hay fever?',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+
+            // Question 1
+            Text('Do you have diagnosed hay fever?',
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment<bool>(
-                  value: true,
-                  label: Text('Yes'),
-                ),
-                ButtonSegment<bool>(
-                  value: false,
-                  label: Text('No'),
-                ),
-              ],
-              selected: _hadHayFever == null ? {} : {_hadHayFever!},
-              multiSelectionEnabled: false,
-              showSelectedIcon: false,
-              emptySelectionAllowed: true,
-              onSelectionChanged: (Set<bool> newSelection) {
-                setState(() {
-                  // Erlaube das Leeren nicht, aber 'firstOrNull' fängt es sicher ab
-                  if (newSelection.isNotEmpty) {
-                    _hadHayFever = newSelection.first;
-                  }
-                });
-              },
+            _buildYesNoButtons(
+              currentValue: _hadHayFever,
+              onChanged: (val) => setState(() => _hadHayFever = val),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Question 2
+            Text('Do you experience hay fever symptoms?',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            _buildYesNoButtons(
+              currentValue: _hasAllergySymptoms,
+              onChanged: (val) => setState(() => _hasAllergySymptoms = val),
             ),
           ],
         ),
@@ -236,8 +199,40 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
     );
   }
 
-  // Baut eine einzelne "Karte" für ein Symptom
+  Widget _buildYesNoButtons({
+    required bool? currentValue,
+    required void Function(bool) onChanged,
+  }) {
+    return SegmentedButton<bool>(
+      segments: const [
+        ButtonSegment(value: true, label: Text('Yes')),
+        ButtonSegment(value: false, label: Text('No')),
+      ],
+      selected: currentValue == null ? {} : {currentValue},
+      multiSelectionEnabled: false,
+      showSelectedIcon: false,
+      emptySelectionAllowed: true,
+      onSelectionChanged: (Set<bool> newSel) {
+        if (newSel.isNotEmpty) onChanged(newSel.first);
+      },
+    );
+  }
+
   Widget _buildSymptomCard(String symptom) {
+    final descriptions = {
+      'Urge to swallow': 'A frequent feeling that you need to swallow.',
+      'Itchy palate':
+          'An itching sensation on the roof of your mouth, common with allergies.',
+      'Itchy eyes':
+          'Eyes that feel irritated, watery, or itchy due to allergic reactions.',
+      'Cough':
+          'A reflex action to clear your airways of mucus or irritants, often worsened by allergies.',
+      'Itchy ears':
+          'A tickling or irritating feeling inside the ears, typical during pollen season.',
+      'Frequent throat clearing':
+          'Needing to clear your throat repeatedly, often because of mucus buildup.',
+    };
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
@@ -245,31 +240,37 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(symptom, style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 8),
             Text(
-              symptom,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 16),
-            // FRAGE 1: Familiarity
-            _buildQuestion(
-              question: 'Level of Familiarity',
-              symptom: symptom,
-              questionKey: 'familiarity',
-              // 5-Punkte-Skala
-              numSegments: 5,
-              // End-Labels für die 4-Punkte-Skala
-              labels: ['Not at all familiar', 'Extremely familiar'],
+              descriptions[symptom] ?? '',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.grey[700]),
             ),
             const SizedBox(height: 24),
-            // FRAGE 2: Frequency
+
+            // Frequency
             _buildQuestion(
-              question: 'Frequency',
+              question:
+                  'If I have a symptom, this is how often I use this reaction:',
               symptom: symptom,
               questionKey: 'frequency',
-              // 5-Punkte-Skala
               numSegments: 5,
-              // End-Labels für die 5-Punkte-Skala
-              labels: ['Never', 'A great deal'],
+              labels: ['Never use', 'Frequently use'],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Familiarity
+            _buildQuestion(
+              question:
+                  'If I have hay fever symptoms, how familiar does this reaction feel to me?',
+              symptom: symptom,
+              questionKey: 'familiarity',
+              numSegments: 5,
+              labels: ['Not at all familiar', 'Extremely familiar'],
             ),
           ],
         ),
@@ -277,40 +278,31 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
     );
   }
 
-  // Baut eine einzelne Frage mit einer N-stufigen Skala
   Widget _buildQuestion({
     required String question,
     required String symptom,
     required String questionKey,
-    required int numSegments, // NEU: 4 für Q1, 5 für Q2
+    required int numSegments,
     required List<String> labels,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          question,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text(question, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         SegmentedButton<int>(
-          // Erzeugt Segmente [1, 2, 3, 4] oder [1, 2, 3, 4, 5]
           segments: List.generate(numSegments, (i) => i + 1).map((value) {
             return ButtonSegment<int>(
               value: value,
               label: Text(value.toString()),
             );
           }).toList(),
-          // Holt den aktuell gespeicherten Wert (z.B. 3)
           selected: {_answers[symptom]![questionKey]}.whereType<int>().toSet(),
           multiSelectionEnabled: false,
           showSelectedIcon: false,
-          emptySelectionAllowed: true, // Erlaubt das "Leeren" der Auswahl
-
+          emptySelectionAllowed: true,
           onSelectionChanged: (Set<int> newSelection) {
             setState(() {
-              // Speichert 'null', wenn die Auswahl geleert wird,
-              // ansonsten den ersten Wert (z.B. 3)
               _answers[symptom]![questionKey] =
                   newSelection.isEmpty ? null : newSelection.first;
             });
@@ -325,7 +317,7 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
               Text(labels[1], style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
-        )
+        ),
       ],
     );
   }
