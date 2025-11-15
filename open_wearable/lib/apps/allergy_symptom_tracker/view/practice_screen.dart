@@ -54,44 +54,49 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              flex: 3,
-              child: Container(
-                width: double.infinity,
-                color: Colors.black,
-                child: FutureBuilder<void>(
-                  future: _initializeControllerFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done &&
-                        _cameraController != null &&
-                        _cameraController!.value.isInitialized) {
-                      return ClipRect(
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: SizedBox(
-                            width: _cameraController!.value.previewSize!.height,
-                            height: _cameraController!.value.previewSize!.width,
-                            child: CameraPreview(_cameraController!),
-                          ),
+      body: Column(
+        children: [
+          // Kamera-Bereich, komplett bis zum oberen Bildschirmrand
+          Expanded(
+            flex: 3,
+            child: Container(
+              width: double.infinity,
+              color: Colors.black,
+              child: FutureBuilder<void>(
+                future: _initializeControllerFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      _cameraController != null &&
+                      _cameraController!.value.isInitialized) {
+                    return ClipRect(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: _cameraController!.value.previewSize!.height,
+                          height: _cameraController!.value.previewSize!.width,
+                          child: CameraPreview(_cameraController!),
                         ),
-                      );
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      );
-                    }
-                  },
-                ),
+                      ),
+                    );
+                  } else {
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    );
+                  }
+                },
               ),
             ),
-            Expanded(
-              flex: 2,
+          ),
+
+          // Unterer Bereich: Button + Text
+          Expanded(
+            flex: 2,
+            child: SafeArea(
+              // SafeArea nur hier, damit Button + Text nicht abgeschnitten werden
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -114,8 +119,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
                     child: ElevatedButton(
                       onPressed: widget.onStartMeasurment,
                       style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(Colors.grey),
-                        shape: WidgetStateProperty.all(
+                        backgroundColor: MaterialStateProperty.all(Colors.grey),
+                        shape: MaterialStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -134,8 +139,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
