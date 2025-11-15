@@ -6,7 +6,6 @@ import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.dart';
 import 'study_runner.dart';
 
-// Typdefinition für die Ergebnisse
 typedef SurveyResults = Map<String, Map<String, int>>;
 
 class SymptomSurveyScreen extends StatefulWidget {
@@ -254,7 +253,7 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
             // Frequency
             _buildQuestion(
               question:
-                  'If I have a symptom, this is how often I use this reaction:',
+                  'If I have a symptom, this is how often I use this reaction:', //andere fomulierung mit andere skala
               symptom: symptom,
               questionKey: 'frequency',
               numSegments: 5,
