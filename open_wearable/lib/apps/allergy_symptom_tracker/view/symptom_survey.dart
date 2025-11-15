@@ -189,19 +189,25 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("General Questions",
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              "General Questions",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 16),
-            Text("Do you have diagnosed hay fever?",
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              "Do you have diagnosed hay fever?",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             _buildYesNo(
               currentValue: _hadHayFever,
               onChanged: (v) => setState(() => _hadHayFever = v),
             ),
             const SizedBox(height: 20),
-            Text("Do you experience hay fever symptoms?",
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              "Do you experience hay fever symptoms?",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             _buildYesNo(
               currentValue: _hasAllergySymptoms,
@@ -226,14 +232,20 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(symptom.name,
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              symptom.name,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 6),
-            Text(symptom.description,
-                style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              symptom.description,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 20),
-            Text("Is this symptom familiar to you?",
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              "Is this symptom familiar to you?",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             _buildYesNo(
               currentValue: state["known"],
@@ -241,7 +253,6 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
                 setState(() {
                   state["known"] = val;
 
-                  // reset reaction answers when unknown
                   if (val == false) {
                     state["reactions"].updateAll((key, value) => null);
                   }
@@ -250,8 +261,10 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
             ),
             if (state["known"] == true) ...[
               const SizedBox(height: 24),
-              Text("How often do you react this way?",
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                "How often do you react this way?",
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 12),
               for (final r in symptom.reactions)
                 Padding(
