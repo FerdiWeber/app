@@ -6,8 +6,26 @@ import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:open_wearable/apps/allergy_symptom_tracker/model/study_protocol.dart';
 import 'study_runner.dart';
 
-typedef SurveyResults = Map<String, Map<String, int>>;
+typedef SurveyResults = Map<String, dynamic>;
 
+/// ---------------------------------------------------------------------------
+/// DATA MODEL
+/// ---------------------------------------------------------------------------
+class SymptomDefinition {
+  final String name;
+  final String description;
+  final List<String> reactions;
+
+  SymptomDefinition({
+    required this.name,
+    required this.description,
+    required this.reactions,
+  });
+}
+
+/// ---------------------------------------------------------------------------
+/// MAIN SCREEN
+/// ---------------------------------------------------------------------------
 class SymptomSurveyScreen extends StatefulWidget {
   final StudyProtocol protocol;
   final String experimentId;
@@ -34,126 +52,126 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
   bool? _hadHayFever;
   bool? _hasAllergySymptoms;
 
-  final List<String> _symptoms = [
-    'Urge to swallow',
-    'Itchy palate',
-    'Itchy eyes',
-    'Cough',
-    'Itchy ears',
-    'Frequent throat clearing',
+  /// --------------------------------------------------------
+  /// DEFINE SYMPTOMS + REACTIONS HERE
+  /// -> Das ist dein einziger Anpassungspunkt!
+  /// --------------------------------------------------------
+  final List<SymptomDefinition> symptomList = [
+    SymptomDefinition(
+      name: "Itchy eyes",
+      description: "Eyes feel irritated, watery or itchy.",
+      reactions: [
+        "Rubbing eyes",
+      ],
+    ),
+    SymptomDefinition(
+      name: "Cough",
+      description: "A reflex to clear your airways.",
+      reactions: [
+        "Coughing",
+        "Throat clearing",
+      ],
+    ),
+    SymptomDefinition(
+      name: "Globus sensation",
+      description:
+          "A feeling of a lump, tightness, or something stuck in the throat, even though no physical obstruction is present",
+      reactions: [
+        "Urge to swallow",
+      ],
+    ),
+    SymptomDefinition(
+      name: "Itchy palate",
+      description: "Tickling/itching sensation on the roof of your mouth.",
+      reactions: [
+        "Tongue rubbing in the throat",
+        "salvia pumping in the throat",
+      ],
+    ),
+    SymptomDefinition(
+      name: "Itchy ears",
+      description: "Tickling/itching sensation on the roof of your mouth.",
+      reactions: [
+        "rubbing the ears",
+      ],
+    ),
+    SymptomDefinition(
+      name: "Running nose",
+      description: "A nose that keeps dripping or feels wet.",
+      reactions: [
+        "sniffing",
+      ],
+    ),
   ];
 
-  late final Map<String, Map<String, int?>> _answers;
+  /// Stores: known? + reaction frequencies
+  late Map<String, Map<String, dynamic>> symptomAnswers;
 
   @override
   void initState() {
     super.initState();
-    _answers = {
-      for (var symptom in _symptoms)
-        symptom: {
-          'familiarity': null,
-          'frequency': null,
-        }
+
+    // Build dynamic answer structure
+    symptomAnswers = {
+      for (var symptom in symptomList)
+        symptom.name: {
+          "known": null, // bool
+          "reactions": <String, int?>{
+            for (var r in symptom.reactions) r: null,
+          },
+        },
     };
   }
 
+  /// Checks if all required fields are filled in
   bool _isSurveyComplete() {
     if (_hadHayFever == null || _hasAllergySymptoms == null) return false;
-    for (var symptom in _symptoms) {
-      if (_answers[symptom]!['familiarity'] == null ||
-          _answers[symptom]!['frequency'] == null) {
-        return false;
+
+    for (final symptom in symptomList) {
+      final data = symptomAnswers[symptom.name]!;
+      if (data["known"] == null) return false;
+
+      if (data["known"] == true) {
+        // must answer all reaction frequencies
+        for (var r in symptom.reactions) {
+          if (data["reactions"][r] == null) return false;
+        }
       }
     }
     return true;
   }
 
+  /// ---------------------------------------------------------------------------
+  /// UI
+  /// ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Symptom Survey'),
-      ),
+      appBar: AppBar(title: const Text("Symptom Survey")),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              itemCount: _symptoms.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) return _buildGeneralQuestionsCard();
-                final symptom = _symptoms[index - 1];
-                return _buildSymptomCard(symptom);
-              },
+            child: ListView(
+              padding: const EdgeInsets.all(12),
+              children: [
+                _buildGeneralQuestions(),
+                const SizedBox(height: 20),
+
+                /// Symptom Cards
+                for (final s in symptomList) _buildSymptomCard(s),
+              ],
             ),
           ),
+
+          /// Continue button
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: ElevatedButton(
+              onPressed: _isSurveyComplete() ? _finishSurvey : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
-              onPressed: _isSurveyComplete()
-                  ? () async {
-                      final SurveyResults results =
-                          _answers.map((symptom, questions) {
-                        return MapEntry(symptom, questions.map((key, value) {
-                          return MapEntry(key, value!);
-                        }));
-                      });
-
-                      results['general'] = {
-                        'hadHayFever': _hadHayFever! ? 1 : 0,
-                        'hasAllergySymptoms': _hasAllergySymptoms! ? 1 : 0,
-                      };
-
-                      final logger = ExperimentLogger();
-                      final date = null;
-                      final prefix = '${widget.experimentId}_survey_${date}_';
-                      await logger.startLogging(prefix, false);
-
-                      for (var entry in results.entries) {
-                        final symptom = entry.key;
-                        final data = entry.value;
-                        if (symptom == 'general') {
-                          logger.logOtherEvent(
-                            0,
-                            "SurveyResults",
-                            symptom,
-                            "hadHayFever: ${data['hadHayFever']}, hasAllergySymptoms: ${data['hasAllergySymptoms']}",
-                          );
-                        } else {
-                          logger.logOtherEvent(
-                            0,
-                            "SurveyResults",
-                            symptom,
-                            "familiarity: ${data['familiarity']}, frequency: ${data['frequency']}",
-                          );
-                        }
-                      }
-
-                      await logger.stopAndWriteLogging(false);
-                      print("✅ Survey results saved to separate CSV file.");
-
-                      if (context.mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          platformPageRoute(
-                            context: context,
-                            builder: (_) => StudyRunner(
-                              protocol: widget.protocol,
-                              experimentId: widget.experimentId,
-                              leftWearable: widget.leftWearable,
-                              rightWearable: widget.rightWearable,
-                              leftConfigProvider: widget.leftConfigProvider,
-                              rightConfigProvider: widget.rightConfigProvider,
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                  : null,
-              child: const Text('Continue'),
+              child: const Text("Continue"),
             ),
           ),
         ],
@@ -161,36 +179,33 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
     );
   }
 
-  Widget _buildGeneralQuestionsCard() {
+  /// ---------------------------------------------------------------------------
+  /// GENERAL QUESTIONS
+  /// ---------------------------------------------------------------------------
+  Widget _buildGeneralQuestions() {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('General Questions',
+            Text("General Questions",
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 16),
-
-            // Question 1
-            Text('Do you have diagnosed hay fever?',
+            Text("Do you have diagnosed hay fever?",
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            _buildYesNoButtons(
+            _buildYesNo(
               currentValue: _hadHayFever,
-              onChanged: (val) => setState(() => _hadHayFever = val),
+              onChanged: (v) => setState(() => _hadHayFever = v),
             ),
-
-            const SizedBox(height: 24),
-
-            // Question 2
-            Text('Do you experience hay fever symptoms?',
+            const SizedBox(height: 20),
+            Text("Do you experience hay fever symptoms?",
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            _buildYesNoButtons(
+            _buildYesNo(
               currentValue: _hasAllergySymptoms,
-              onChanged: (val) => setState(() => _hasAllergySymptoms = val),
+              onChanged: (v) => setState(() => _hasAllergySymptoms = v),
             ),
           ],
         ),
@@ -198,126 +213,178 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
     );
   }
 
-  Widget _buildYesNoButtons({
+  /// ---------------------------------------------------------------------------
+  /// SYMPTOM CARD
+  /// ---------------------------------------------------------------------------
+  Widget _buildSymptomCard(SymptomDefinition symptom) {
+    final state = symptomAnswers[symptom.name]!;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(symptom.name,
+                style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 6),
+            Text(symptom.description,
+                style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 20),
+            Text("Is this symptom familiar to you?",
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            _buildYesNo(
+              currentValue: state["known"],
+              onChanged: (val) {
+                setState(() {
+                  state["known"] = val;
+
+                  // reset reaction answers when unknown
+                  if (val == false) {
+                    state["reactions"].updateAll((key, value) => null);
+                  }
+                });
+              },
+            ),
+            if (state["known"] == true) ...[
+              const SizedBox(height: 24),
+              Text("How often do you react this way?",
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              for (final r in symptom.reactions)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: _buildReactionScale(
+                    symptomName: symptom.name,
+                    reaction: r,
+                  ),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// ---------------------------------------------------------------------------
+  /// REACTION 1–5 SCALE
+  /// ---------------------------------------------------------------------------
+  Widget _buildReactionScale({
+    required String symptomName,
+    required String reaction,
+  }) {
+    // KORREKTUR 1: Wir holen uns die innere Map und sagen Dart, dass es eine Map ist.
+    final reactionsMap =
+        symptomAnswers[symptomName]!["reactions"] as Map<String, dynamic>;
+
+    // KORREKTUR 2: Wir holen den Wert und casten ihn explizit zu 'int?'.
+    // Das ist entscheidend! Ohne das 'as int?' ist value 'dynamic'.
+    final int? value = reactionsMap[reaction] as int?;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(reaction, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        SegmentedButton<int>(
+          segments: List.generate(5, (i) => i + 1).map((v) {
+            return ButtonSegment(value: v, label: Text("$v"));
+          }).toList(),
+          // Da 'value' jetzt sicher ein 'int?' ist, wird hier korrekt ein Set<int> erzeugt.
+          selected: value == null ? <int>{} : {value},
+          multiSelectionEnabled: false,
+          emptySelectionAllowed: true,
+          showSelectedIcon: false,
+          onSelectionChanged: (set) {
+            setState(() {
+              // Wir schreiben den Wert zurück in die Map Referenz
+              reactionsMap[reaction] = set.isEmpty ? null : set.first;
+            });
+          },
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Text("Never"),
+            Text("Very often"),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// ---------------------------------------------------------------------------
+  /// YES/NO BUTTONS
+  /// ---------------------------------------------------------------------------
+  Widget _buildYesNo({
     required bool? currentValue,
     required void Function(bool) onChanged,
   }) {
     return SegmentedButton<bool>(
       segments: const [
-        ButtonSegment(value: true, label: Text('Yes')),
-        ButtonSegment(value: false, label: Text('No')),
+        ButtonSegment(value: true, label: Text("Yes")),
+        ButtonSegment(value: false, label: Text("No")),
       ],
       selected: currentValue == null ? {} : {currentValue},
       multiSelectionEnabled: false,
-      showSelectedIcon: false,
       emptySelectionAllowed: true,
-      onSelectionChanged: (Set<bool> newSel) {
-        if (newSel.isNotEmpty) onChanged(newSel.first);
+      showSelectedIcon: false,
+      onSelectionChanged: (set) {
+        if (set.isNotEmpty) onChanged(set.first);
       },
     );
   }
 
-  Widget _buildSymptomCard(String symptom) {
-    final descriptions = {
-      'Urge to swallow': 'A frequent feeling that you need to swallow.',
-      'Itchy palate':
-          'An itching sensation on the roof of your mouth, common with allergies.',
-      'Itchy eyes':
-          'Eyes that feel irritated, watery, or itchy due to allergic reactions.',
-      'Cough':
-          'A reflex action to clear your airways of mucus or irritants, often worsened by allergies.',
-      'Itchy ears':
-          'A tickling or irritating feeling inside the ears, typical during pollen season.',
-      'Frequent throat clearing':
-          'Needing to clear your throat repeatedly, often because of mucus buildup.',
+  /// ---------------------------------------------------------------------------
+  /// FINISH + LOGGING
+  /// ---------------------------------------------------------------------------
+  Future<void> _finishSurvey() async {
+    final results = <String, dynamic>{};
+
+    // general section
+    results["general"] = {
+      "hadHayFever": _hadHayFever,
+      "hasAllergySymptoms": _hasAllergySymptoms,
     };
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(symptom, style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Text(
-              descriptions[symptom] ?? '',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 24),
+    // symptoms
+    for (var entry in symptomAnswers.entries) {
+      results[entry.key] = entry.value;
+    }
 
-            // Frequency
-            _buildQuestion(
-              question:
-                  'If I have a symptom, this is how often I use this reaction:', //andere fomulierung mit andere skala
-              symptom: symptom,
-              questionKey: 'frequency',
-              numSegments: 5,
-              labels: ['Never use', 'Frequently use'],
-            ),
+    // Logging (same logic as before)
+    final logger = ExperimentLogger();
+    final prefix = "${widget.experimentId}_survey_${DateTime.now()}_";
+    await logger.startLogging(prefix, false);
 
-            const SizedBox(height: 24),
+    for (var entry in results.entries) {
+      logger.logOtherEvent(
+        0,
+        "SurveyResults",
+        entry.key,
+        entry.value.toString(),
+      );
+    }
 
-            // Familiarity
-            _buildQuestion(
-              question:
-                  'If I have hay fever symptoms, how familiar does this reaction feel to me?',
-              symptom: symptom,
-              questionKey: 'familiarity',
-              numSegments: 5,
-              labels: ['Not at all familiar', 'Extremely familiar'],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    await logger.stopAndWriteLogging(false);
 
-  Widget _buildQuestion({
-    required String question,
-    required String symptom,
-    required String questionKey,
-    required int numSegments,
-    required List<String> labels,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(question, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        SegmentedButton<int>(
-          segments: List.generate(numSegments, (i) => i + 1).map((value) {
-            return ButtonSegment<int>(
-              value: value,
-              label: Text(value.toString()),
-            );
-          }).toList(),
-          selected: {_answers[symptom]![questionKey]}.whereType<int>().toSet(),
-          multiSelectionEnabled: false,
-          showSelectedIcon: false,
-          emptySelectionAllowed: true,
-          onSelectionChanged: (Set<int> newSelection) {
-            setState(() {
-              _answers[symptom]![questionKey] =
-                  newSelection.isEmpty ? null : newSelection.first;
-            });
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(labels[0], style: Theme.of(context).textTheme.bodySmall),
-              Text(labels[1], style: Theme.of(context).textTheme.bodySmall),
-            ],
+    if (context.mounted) {
+      Navigator.pushReplacement(
+        context,
+        platformPageRoute(
+          context: context,
+          builder: (_) => StudyRunner(
+            protocol: widget.protocol,
+            experimentId: widget.experimentId,
+            leftWearable: widget.leftWearable,
+            rightWearable: widget.rightWearable,
+            leftConfigProvider: widget.leftConfigProvider,
+            rightConfigProvider: widget.rightConfigProvider,
           ),
         ),
-      ],
-    );
+      );
+    }
   }
 }
