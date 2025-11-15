@@ -458,10 +458,11 @@ class Dataset3Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.measuring,
           heading: "Swallowing",
-          duration: 30,
+          duration: 10,
           actionButton: true,
           repetitions: 1,
           practiceText: "you can now practice to swallow",
+          counterMode: true,
           debugMode: true,
         ),
         StudyStep(

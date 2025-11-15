@@ -14,6 +14,7 @@ class MeasuringScreen extends StatefulWidget {
   final bool signalFrame;
   final List<int> measuringTimes;
   final List<String> measuringInstructions;
+  final bool counterMode;
   final bool debugMode;
 
   final ExperimentLogger logger;
@@ -39,6 +40,7 @@ class MeasuringScreen extends StatefulWidget {
     required this.recordingId,
     required this.stepHeading,
     required this.measuringStepCounter,
+    required this.counterMode,
     this.onActionButtonPressed,
     this.onActionButtonReleased,
     this.onSignalFrameChanged,
@@ -52,6 +54,7 @@ class MeasuringScreen extends StatefulWidget {
 class _MeasuringScreenState extends State<MeasuringScreen> {
   late int _remaining;
   int _phaseRemaining = 0;
+  int _currentCount = 0;
 
   Timer? _timer;
   Timer? _preTimer;
@@ -73,6 +76,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   void initState() {
     super.initState();
     _remaining = widget.duration;
+    _currentCount = 0;
     _initCamera();
     _startPreCountdown();
   }
@@ -170,7 +174,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       setState(() => _firstShowPreCountdown = false);
     }
 
-    if (widget.signalFrame) {
+    if (widget.counterMode) {
+      setState(() {});
+    } else if (widget.signalFrame) {
       _startFrameCycle();
       _timer = Timer(Duration(seconds: widget.duration), _cancelAndNext);
     } else {
@@ -254,6 +260,19 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     super.dispose();
   }
 
+  void _onActionButtonPressed() {
+    widget.onActionButtonPressed?.call();
+
+    if (widget.counterMode) {
+      setState(() {
+        _currentCount++;
+      });
+      if (_currentCount >= widget.duration) {
+        _cancelAndNext();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final int displayTime = widget.signalFrame ? _phaseRemaining : _remaining;
@@ -261,6 +280,12 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
         (_cycleIndex - 1) % widget.measuringInstructions.length;
     final String currentInstruction =
         _showPreCountdown ? "" : widget.measuringInstructions[instructionIndex];
+    String timerText;
+    if (widget.counterMode) {
+      timerText = '$_currentCount out of ${widget.duration}';
+    } else {
+      timerText = '$displayTime s';
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -333,7 +358,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 40.0),
                               child: Text(
-                                '$displayTime s',
+                                timerText,
                                 style: const TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.bold,
@@ -354,7 +379,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                             width: 350,
                             child: Listener(
                               onPointerDown: (_) {
-                                widget.onActionButtonPressed?.call();
+                                _onActionButtonPressed();
                               },
                               onPointerUp: (_) {
                                 widget.onActionButtonReleased?.call();

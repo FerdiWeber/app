@@ -301,6 +301,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             signalFrame: step.signalFrame,
             measuringTimes: step.measuringTimes,
             measuringInstructions: step.measuringInstructions,
+            counterMode: step.counterMode,
             onActionButtonPressed: () {
               _logger.logOtherEvent(
                 _measuringStepCounter + 1,
