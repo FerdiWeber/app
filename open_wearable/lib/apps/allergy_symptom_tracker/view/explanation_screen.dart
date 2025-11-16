@@ -23,7 +23,7 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
           'It aims to evaluate how well the built-in sensors can detect these reactions. '
           'You will first complete a short survey about hay fever symptoms. '
           'The app will then guide you step by step through the recording process. '
-          'Before each session, you’ll receive clear instructions — read them carefully, then start recording. '
+          'Before each session, you’ll receive clear instructions and a chance to practice the described reaction — read them carefully, then start recording. '
           'If something goes wrong, you can repeat the recording. '
           'Try to behave as naturally as possible during each session. '
           'There are two types of recordings, which differ in how your actions are marked. Both are explained on the next pages.',
@@ -32,12 +32,12 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
       'text': 'This is the first recording type. '
           'You’ll see yourself on screen while a timer or counter shows the remaining recording time or how many actions you have left. '
           'Press AND hold (!) the "Action" button during the whole time of your reaction. '
-          'The buttons marks the duration of actions in the recorded data.',
+          'The button press defines the action period in the recorded data.',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_1.png',
     },
     {
       'text': 'This is the second recording type. '
-          'A green or red frame alternates around the screen, each with a countdown timer. '
+          'A green or red frame alternates around the screen, each with a countdown timer and instructions.'
           'When the frame is green, perform the reaction continuously until it turns red again. '
           'During red phases, behave normally. '
           'Each session starts with a red phase, and no button press is needed in this mode.',
@@ -133,7 +133,7 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: SizedBox(
-                              height: 380, // fixe Höhe für beide Screenshots
+                              height: 368, // fixe Höhe für beide Screenshots
                               width: double.infinity,
                               child: Image.asset(
                                 page['image']!,
