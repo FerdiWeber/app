@@ -54,7 +54,6 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
 
   /// --------------------------------------------------------
   /// DEFINE SYMPTOMS + REACTIONS HERE
-  /// -> Das ist dein einziger Anpassungspunkt!
   /// --------------------------------------------------------
   final List<SymptomDefinition> symptomList = [
     SymptomDefinition(
@@ -65,17 +64,9 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
       ],
     ),
     SymptomDefinition(
-      name: "Cough",
-      description: "A reflex to clear your airways.",
-      reactions: [
-        "Coughing",
-        "Throat clearing",
-      ],
-    ),
-    SymptomDefinition(
       name: "Globus sensation",
       description:
-          "A feeling of a lump, tightness, or something stuck in the throat, even though no physical obstruction is present",
+          "A feeling of a lump, tightness, or something stuck in the throat.",
       reactions: [
         "Urge to swallow",
       ],
@@ -84,22 +75,24 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
       name: "Itchy palate",
       description: "Tickling/itching sensation on the roof of your mouth.",
       reactions: [
+        "Coughing",
+        "Throat clearing",
         "Tongue rubbing in the throat",
-        "salvia pumping in the throat",
+        "Saliva pumping in the throat",
       ],
     ),
     SymptomDefinition(
       name: "Itchy ears",
-      description: "Tickling/itching sensation on the roof of your mouth.",
+      description: "Itching sensation on or inside the ears.",
       reactions: [
-        "rubbing the ears",
+        "Rubbing the ears",
       ],
     ),
     SymptomDefinition(
       name: "Running nose",
       description: "A nose that keeps dripping or feels wet.",
       reactions: [
-        "sniffing",
+        "Sniffing",
       ],
     ),
   ];
@@ -111,11 +104,10 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
   void initState() {
     super.initState();
 
-    // Build dynamic answer structure
     symptomAnswers = {
       for (var symptom in symptomList)
         symptom.name: {
-          "known": null, // bool
+          "known": null,
           "reactions": <String, int?>{
             for (var r in symptom.reactions) r: null,
           },
@@ -123,16 +115,33 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
     };
   }
 
-  /// Checks if all required fields are filled in
+  /// --------------------------------------------------------
+  /// SHOW SYMPTOM QUESTIONS?
+  /// --------------------------------------------------------
+  bool _shouldShowSymptoms() {
+    if (_hadHayFever == true || _hasAllergySymptoms == true) {
+      return true;
+    }
+    return false;
+  }
+
+  /// --------------------------------------------------------
+  /// SURVEY COMPLETE?
+  /// --------------------------------------------------------
   bool _isSurveyComplete() {
     if (_hadHayFever == null || _hasAllergySymptoms == null) return false;
 
+    // If both general questions = NO → no symptoms required
+    if (_hadHayFever == false && _hasAllergySymptoms == false) {
+      return true;
+    }
+
+    // Else: symptoms required
     for (final symptom in symptomList) {
       final data = symptomAnswers[symptom.name]!;
       if (data["known"] == null) return false;
 
       if (data["known"] == true) {
-        // must answer all reaction frequencies
         for (var r in symptom.reactions) {
           if (data["reactions"][r] == null) return false;
         }
@@ -156,9 +165,9 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
               children: [
                 _buildGeneralQuestions(),
                 const SizedBox(height: 20),
-
-                /// Symptom Cards
-                for (final s in symptomList) _buildSymptomCard(s),
+                if (_shouldShowSymptoms()) ...[
+                  for (final s in symptomList) _buildSymptomCard(s),
+                ],
               ],
             ),
           ),
@@ -282,18 +291,15 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
   }
 
   /// ---------------------------------------------------------------------------
-  /// REACTION 1–5 SCALE
+  /// REACTION SCALE
   /// ---------------------------------------------------------------------------
   Widget _buildReactionScale({
     required String symptomName,
     required String reaction,
   }) {
-    // KORREKTUR 1: Wir holen uns die innere Map und sagen Dart, dass es eine Map ist.
     final reactionsMap =
         symptomAnswers[symptomName]!["reactions"] as Map<String, dynamic>;
 
-    // KORREKTUR 2: Wir holen den Wert und casten ihn explizit zu 'int?'.
-    // Das ist entscheidend! Ohne das 'as int?' ist value 'dynamic'.
     final int? value = reactionsMap[reaction] as int?;
 
     return Column(
@@ -302,17 +308,15 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
         Text(reaction, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         SegmentedButton<int>(
-          segments: List.generate(5, (i) => i + 1).map((v) {
-            return ButtonSegment(value: v, label: Text("$v"));
-          }).toList(),
-          // Da 'value' jetzt sicher ein 'int?' ist, wird hier korrekt ein Set<int> erzeugt.
+          segments: List.generate(5, (i) => i + 1)
+              .map((v) => ButtonSegment(value: v, label: Text("$v")))
+              .toList(),
           selected: value == null ? <int>{} : {value},
           multiSelectionEnabled: false,
           emptySelectionAllowed: true,
           showSelectedIcon: false,
           onSelectionChanged: (set) {
             setState(() {
-              // Wir schreiben den Wert zurück in die Map Referenz
               reactionsMap[reaction] = set.isEmpty ? null : set.first;
             });
           },
@@ -321,7 +325,7 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: const [
             Text("Never"),
-            Text("Very often"),
+            Text("Always"),
           ],
         ),
       ],
@@ -356,18 +360,15 @@ class _SymptomSurveyScreenState extends State<SymptomSurveyScreen> {
   Future<void> _finishSurvey() async {
     final results = <String, dynamic>{};
 
-    // general section
     results["general"] = {
       "hadHayFever": _hadHayFever,
       "hasAllergySymptoms": _hasAllergySymptoms,
     };
 
-    // symptoms
     for (var entry in symptomAnswers.entries) {
       results[entry.key] = entry.value;
     }
 
-    // Logging (same logic as before)
     final logger = ExperimentLogger();
     final prefix = "${widget.experimentId}_survey_${DateTime.now()}_";
     await logger.startLogging(prefix, false);
