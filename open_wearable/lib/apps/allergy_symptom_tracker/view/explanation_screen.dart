@@ -30,9 +30,9 @@ class _ExplanationScreenState extends State<ExplanationScreen> {
     },
     {
       'text': 'This is the first recording type. '
-          'You’ll see yourself on screen while a timer shows the remaining recording time. '
-          'Press the “Action” button exactly when your reaction starts. '
-          'This button marks the beginning of your reaction in the data.',
+          'You’ll see yourself on screen while a timer or counter shows the remaining recording time or how many actions you have left. '
+          'Press AND hold (!) the "Action" button during the whole time of your reaction. '
+          'The buttons marks the duration of actions in the recorded data.',
       'image': 'lib/apps/allergy_symptom_tracker/assets/screenshot_1.png',
     },
     {

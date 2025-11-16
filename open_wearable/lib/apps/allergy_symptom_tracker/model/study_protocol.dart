@@ -11,15 +11,17 @@ class Dataset1Protocol extends StudyProtocol {
           type: StudyStepType.instruction,
           heading: "Swallowing",
           description:
-              "During the recording, try to swallow at regular intervals. "
-              "Press the action button immediately at the beginning of swallowing.",
+              "During the recording, try to swallow at regular intervals."
+              "Press and hold the action button during the whole time of you swallowing. \n"
+              "Recording Type: Counter",
         ),
         StudyStep(
           type: StudyStepType.measuring,
           heading: "Swallowing",
-          duration: 30,
+          duration: 10,
           actionButton: true,
-          repetitions: 1,
+          counterMode: true,
+          repetitions: 5,
           practiceText: "you can now practice to swallow",
         ),
         StudyStep(
@@ -29,14 +31,15 @@ class Dataset1Protocol extends StudyProtocol {
               "Try doing this once with only your right eye, once with only your left eye, and once with both eyes at the same time"
               "In this recording, there is no action button; the green frame indicates when you should perform the action. "
               "Perform the action throughout the entire green phase. "
-              "Behave normally during the red phases.",
+              "Behave normally during the red phases. \n"
+              "Recording Type: Frame indication ",
         ),
         StudyStep(
           type: StudyStepType.measuring,
           duration: 25,
           signalFrame: true,
           heading: "Rub on the eyes",
-          measuringTimes: [3, 5],
+          measuringTimes: [3, 5, 4, 5, 3, 5, 4, 5],
           practiceText: "you can now practice to rub your eyes",
           measuringInstructions: [
             "Get ready to rub your left eye",
@@ -46,21 +49,23 @@ class Dataset1Protocol extends StudyProtocol {
             "Get ready to rub both your eyey",
             "rub both your eyes",
           ],
-          repetitions: 15,
+          repetitions: 5,
         ),
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Swallowing",
           description:
-              "During the recording, try to swallow at regular intervals. "
-              "Press the action button immediately at the beginning of swallowing.",
+              "During the recording, try to swallow at regular intervals."
+              "Press and hold the action button during the whole time of you swallowing. \n"
+              "Recording Type: Counter",
         ),
         StudyStep(
           type: StudyStepType.measuring,
           heading: "Swallowing",
-          duration: 30,
+          duration: 10,
           actionButton: true,
-          repetitions: 4,
+          counterMode: true,
+          repetitions: 5,
           practiceText: "you can now practice to swallow",
         ),
         StudyStep(
@@ -68,158 +73,147 @@ class Dataset1Protocol extends StudyProtocol {
           heading: "Sniffing",
           description:
               "During the recording, try to sniff at regular intervals."
-              "Press the action button immediately at the beginning of swallowing.",
+              "Press and hold the action button during the whole time of you swallowing. \n"
+              "Recording Type: Timer",
         ),
         StudyStep(
           type: StudyStepType.measuring,
           heading: "Sniffing",
           duration: 30,
-          signalFrame: true,
-          measuringTimes: [2, 5],
-          measuringInstructions: ["get ready to sniff", "now sniff"],
-          repetitions: 10,
+          actionButton: true,
+          repetitions: 5,
           practiceText: "you can now practice to to sniff",
-        ),
-        StudyStep(
-          type: StudyStepType.instruction,
-          heading: "Swallowing",
-          description:
-              "During the recording, try to swallow at regular intervals. "
-              "Press the action button immediately at the beginning of swallowing.",
-        ),
-        StudyStep(
-          type: StudyStepType.measuring,
-          heading: "Swallowing",
-          duration: 30,
-          actionButton: true,
-          repetitions: 4,
-          practiceText: "you can now practice to to swallow",
-        ),
-        StudyStep(
-          type: StudyStepType.instruction,
-          heading: "Sniffing",
-          description:
-              "During the recording, try to sniff at regular intervals."
-              "Press the action button immediately at the beginning of swallowing.",
-        ),
-        StudyStep(
-          type: StudyStepType.measuring,
-          heading: "Sniffing",
-          duration: 30,
-          signalFrame: true,
-          measuringTimes: [2, 5],
-          measuringInstructions: ["get ready to sniff", "now sniff"],
-          repetitions: 10,
-          practiceText: "you can now practice to to sniff",
-        ),
-        StudyStep(
-          type: StudyStepType.instruction,
-          heading: "Swallowing",
-          description:
-              "During the recording, try to swallow at regular intervals. "
-              "Press the action button immediately at the beginning of swallowing.",
-        ),
-        StudyStep(
-          type: StudyStepType.measuring,
-          heading: "Swallowing",
-          duration: 30,
-          actionButton: true,
-          repetitions: 4,
-          practiceText: "you can now practice to to swallow",
-        ),
-        StudyStep(
-          type: StudyStepType.instruction,
-          heading: "Clearing the throat",
-          description:
-              "Clear your throat at regular intervals during the recording. "
-              "Press the action button immediately at the beginning of clearing your throat.",
-        ),
-        StudyStep(
-          type: StudyStepType.measuring,
-          duration: 30,
-          actionButton: true,
-          heading: "Clearing the throad",
-          practiceText: "you can now practice to do some throath clearing",
-          repetitions: 10,
-        ),
-        StudyStep(
-          type: StudyStepType.instruction,
-          heading: "Swallowing",
-          description:
-              "During the recording, try to swallow at regular intervals. "
-              "Press the action button immediately at the beginning of swallowing.",
-        ),
-        StudyStep(
-          type: StudyStepType.measuring,
-          heading: "Swallowing",
-          duration: 30,
-          actionButton: true,
-          repetitions: 4,
-          practiceText: "you can now practice to to swallow",
-        ),
-        StudyStep(
-          type: StudyStepType.instruction,
-          heading: "Clearing the throat",
-          description:
-              "Clear your throat at regular intervals during the recording. "
-              "Press the action button immediately at the beginning of clearing your throat.",
-        ),
-        StudyStep(
-          type: StudyStepType.measuring,
-          duration: 30,
-          actionButton: true,
-          heading: "Clearing the throad",
-          practiceText: "you can now practice to do some throath clearing",
-          repetitions: 10,
         ),
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Scratching movement on the palate",
           description:
               "Use your tongue to make a scratching movement on the back of your palate. "
-              "In this recording, there is no action button; the green frame indicates when you should perform the action. "
+              "The Signal Frame around the display indicates when you should do your scratching movement."
               "Perform the action throughout the entire green phase. "
-              "Behave normally during the red phases.",
+              "Behave normally during the red phases. \n"
+              "Recording Type: Frame indication",
         ),
         StudyStep(
           type: StudyStepType.measuring,
-          duration: 31,
+          duration: 60,
           signalFrame: true,
-          measuringTimes: [2, 5],
+          measuringTimes: [3, 5],
           measuringInstructions: [
             "Get ready to scratch your palate",
             "Keep scratching yout palate",
           ],
           practiceText: "you can now practice to make the scratching movement",
-          repetitions: 20,
+          repetitions: 5,
+        ),
+        StudyStep(
+          type: StudyStepType.instruction,
+          heading: "Clearing the throat",
+          description:
+              "Clear your throat at regular intervals during the recording."
+              "Press and hold the action button during the whole time of your clearing your throat. \n"
+              "Recording Type: Timer",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          duration: 30,
+          actionButton: true,
+          heading: "Clearing the throad",
+          practiceText: "you can now practice to do some throath clearing",
+          repetitions: 5,
+        ),
+        StudyStep(
+          type: StudyStepType.instruction,
+          heading: "Cough",
+          description: "Cough at regular intervals during the recording."
+              "Press and hold the action button during the whole time of your cough \n"
+              "Recording Type: Timer",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          duration: 30,
+          actionButton: true,
+          heading: "Cough",
+          practiceText: "you can now practice to cough",
+          repetitions: 5,
+        ),
+        StudyStep(
+          type: StudyStepType.instruction,
+          heading: "Swallowing",
+          description:
+              "During the recording, try to swallow at regular intervals."
+              "Press and hold the action button during the whole time of you swallowing. \n"
+              "Recording Type: Counter",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          heading: "Swallowing",
+          duration: 10,
+          actionButton: true,
+          counterMode: true,
+          repetitions: 5,
+          practiceText: "you can now practice to swallow",
+        ),
+        StudyStep(
+          type: StudyStepType.instruction,
+          heading: "Rub on the ears",
+          description: "Rub your ears with your hands."
+              "Try to to this once only with your left ear, once with your right ear, an one wit both ears at the same time."
+              "Perform the action throughout the entire green phase. "
+              "Behave normally during the red phases. \n"
+              "Recording Type: Frame indication ",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          duration: 25,
+          signalFrame: true,
+          heading: "Rub on the ears",
+          measuringTimes: [3, 5, 4, 5, 3, 5, 4, 5],
+          practiceText: "you can now practice to rub your ears.",
+          measuringInstructions: [
+            "Get ready to rub your left ear",
+            "rub your left ear",
+            "Get ready to rub your right ear",
+            "rub your right ear",
+            "Get ready to rub both your ear",
+            "rub both your ear",
+          ],
+          repetitions: 5,
         ),
         StudyStep(
           type: StudyStepType.instruction,
           heading: "pumping movement",
-          description: "try to pump salvia",
+          description: "Use your tongue to move salvia over your palate. "
+              "The Signal Frame around the display indicates when you should do your pumping movement."
+              "Perform the action throughout the entire green phase. "
+              "Behave normally during the red phases. \n"
+              "Recording Type: Frame indication",
         ),
         StudyStep(
           type: StudyStepType.measuring,
           heading: "pumping movement",
           signalFrame: true,
-          duration: 31,
+          duration: 60,
           measuringTimes: [3, 5],
           measuringInstructions: ["get ready to pump", "keep pumping"],
-          repetitions: 20,
+          repetitions: 5,
           practiceText: "you can now practice to do the pumping movement",
         ),
         StudyStep(
           type: StudyStepType.instruction,
-          heading: "Reading",
-          description: "From now on the study continues with everyday  tasks."
-              "During the next step please behave normally and read the given text.",
+          heading: "Clearing the throat",
+          description:
+              "Clear your throat at regular intervals during the recording."
+              "Press and hold the action button during the whole time of your clearing your throat. \n"
+              "Recording Type: Timer",
         ),
         StudyStep(
           type: StudyStepType.measuring,
-          duration: 300,
-          actionButton: false,
-          measuringInstructions: ["behave normally"],
-          repetitions: 1,
+          duration: 30,
+          actionButton: true,
+          heading: "Clearing the throad",
+          practiceText: "you can now practice to do some throath clearing",
+          repetitions: 5,
         ),
       ];
 }
