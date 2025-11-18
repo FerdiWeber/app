@@ -46,12 +46,14 @@ class _StudyRunnerState extends State<StudyRunner> {
   bool _showPractice = true;
   int _repetitionCounter = 1;
 
-  // Zählt jetzt nur noch *erfolgreich abgeschlossene* Messungen
+  /// Zählt echte Mess-Schritte (1,2,3...)
   int _measuringStepCounter = 0;
+
+  /// Merkt sich, welcher Measuring-Index zuletzt gezählt wurde
+  int _lastCountedMeasuringIndex = -1;
 
   bool _isConfirming = false;
 
-  // Instanzen für Manager und Logger
   late final ExperimentManager _manager;
   late final ExperimentLogger _logger;
   late final ExperimentConfig _expConfig;
@@ -67,12 +69,12 @@ class _StudyRunnerState extends State<StudyRunner> {
     _loadingFuture = _loadConfigAndInitManager();
   }
 
-  // Lädt die YAML und initialisiert den Manager
   Future<void> _loadConfigAndInitManager() async {
     const String configPath =
         'lib/apps/allergy_symptom_tracker/assets/sensor_config.yaml';
     final seed = widget.experimentId;
     _expConfig = await ExperimentConfig.fromFile(configPath, seed);
+
     _manager = ExperimentManager(
       logger: _logger,
       expConfig: _expConfig,
@@ -86,52 +88,37 @@ class _StudyRunnerState extends State<StudyRunner> {
   Future<void> _startMeasuring(String recordingId) async {
     final step = _steps[_currentIndex];
 
-    // Starte das Logging für diese Messung
     await _logger.startLogging(recordingId, false);
-
-    // !!! DER SURVEY-BLOCK WIRD VON HIER ENTFERNT !!!
-
     _logger.logTaskStart(_currentIndex, step.heading, step.duration);
 
-    // Konfiguriere und starte die Sensoren
     await _manager.setSensorLogFilePrefix(recordingId);
     await _manager.configureSensors();
-    await _logger.sensorsReady; // Wartet auf erste Sync-Timestamps
-    print("Sensoren sind konfiguriert und Aufnahme gestartet!");
+    await _logger.sensorsReady;
+
+    print("Sensoren gestartet");
   }
 
-  // NEU: Stoppt Sensoren und geht zum Bestätigungs-Screen
   Future<void> _stopAndConfirm() async {
-    // 1. Stoppe die Sensoren
     await _manager.deactivateSensors();
-    print("Sensoren gestoppt, warte auf Bestätigung...");
-
-    // 2. Setze den Flag, um den RepeatScreen anzuzeigen
-    setState(() {
-      _isConfirming = true;
-    });
+    setState(() => _isConfirming = true);
   }
 
-  // NEU: Speichert Daten und geht zum nächsten Schritt
   Future<void> _saveAndAdvance() async {
-    // 1. Log-Task beenden und Daten schreiben
+    // Logging speichern
     _logger.logTaskEnd();
     await _logger.stopAndWriteLogging(false);
-    print("Aufnahme bestätigt und gespeichert!");
 
     final currentStep = _steps[_currentIndex];
     final maxRepetitions = currentStep.repetitions;
 
     setState(() {
       _isConfirming = false;
-      _measuringStepCounter++;
 
       if (_repetitionCounter < maxRepetitions) {
-        // Es gibt noch Wiederholungen dieses Schritts
+        // weitere Wiederholung des gleichen Schritts
         _repetitionCounter++;
-        _showPractice = false; // PracticeScreen nur beim ersten Mal
+        _showPractice = false;
       } else {
-        // Alle Wiederholungen abgeschlossen → nächster Schritt
         _repetitionCounter = 1;
         _showPractice = true;
         _nextStep();
@@ -139,31 +126,19 @@ class _StudyRunnerState extends State<StudyRunner> {
     });
   }
 
-  // NEU: Verwirft Daten (implizit) und wiederholt den Schritt
   Future<void> _repeatMeasuringStep() async {
-    print("Aufnahme wird verworfen und wiederholt...");
-    // Daten werden implizit verworfen, da `stopAndWriteLogging` nie aufgerufen wurde.
-    // Beim nächsten `_startMeasuring` wird die (nie geschriebene) Log-Session überschrieben.
-
-    // Setze einfach den Flag zurück. Der build() zeigt jetzt wieder den
-    // MeasuringScreen mit demselben _currentIndex und _measuringStepCounter.
-    setState(() {
-      _isConfirming = false;
-    });
+    print("Messung verworfen, Schritt wird wiederholt");
+    setState(() => _isConfirming = false);
   }
 
-  Future<void> _leaveStudy(bool needToSafe) async {
-    // Stoppe die Sensoren (ohne die aktuellen Daten zu speichern)
+  Future<void> _leaveStudy(bool needToSave) async {
     await _manager.deactivateSensors();
 
-    if (needToSafe) {
+    if (needToSave) {
       try {
         _logger.logTaskEnd();
         await _logger.stopAndWriteLogging(false);
-        print("Letzte Log-Datei gespeichert (Abbruch).");
-      } catch (e) {
-        print("Fehler beim Speichern der Log-Datei beim Abbruch: $e");
-      }
+      } catch (_) {}
     }
 
     if (mounted) {
@@ -182,8 +157,6 @@ class _StudyRunnerState extends State<StudyRunner> {
     }
   }
 
-  // Diese Funktion wird jetzt nur noch für InstructionScreens
-  // und von _saveAndAdvance aufgerufen.
   void _nextStep() {
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
@@ -191,10 +164,11 @@ class _StudyRunnerState extends State<StudyRunner> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text("Studie completed"),
-          content: const Text("Thank you for participating!"),
+          title: const Text("Studie abgeschlossen"),
+          content: const Text("Vielen Dank!"),
           actions: [
             TextButton(
+              child: const Text("OK"),
               onPressed: () {
                 Navigator.of(context).pushAndRemoveUntil(
                   platformPageRoute(
@@ -209,41 +183,43 @@ class _StudyRunnerState extends State<StudyRunner> {
                   (route) => route.isFirst,
                 );
               },
-              child: const Text("OK"),
-            ),
+            )
           ],
         ),
       );
     }
   }
 
+  /// 🔥 Saubere Step-Zählung (NICHT im build!)
+  void _ensureCorrectMeasuringStepCounter() {
+    final step = _steps[_currentIndex];
+
+    if (step.type == StudyStepType.measuring &&
+        _repetitionCounter == 1 &&
+        _currentIndex != _lastCountedMeasuringIndex) {
+      _measuringStepCounter++;
+      _lastCountedMeasuringIndex = _currentIndex;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // FutureBuilder wartet auf das Laden der Konfiguration
     return FutureBuilder<void>(
       future: _loadingFuture,
       builder: (context, snapshot) {
-        // Fall 1: Warten auf das Laden
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // ... (unverändert) ...
           return PlatformScaffold(
-            body: Center(
-              child: PlatformCircularProgressIndicator(),
-            ),
+            body: Center(child: PlatformCircularProgressIndicator()),
           );
         }
 
-        // Fall 2: Fehler beim Laden (z.B. YAML nicht gefunden)
         if (snapshot.hasError) {
           return PlatformScaffold(
             appBar: PlatformAppBar(title: Text("Fehler")),
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  "Fehler beim Laden der Konfiguration:\nStellen Sie sicher, dass '.../sensor_config.yaml' existiert und in pubspec.yaml registriert ist.\n\nFehlerdetails: ${snapshot.error}",
-                  textAlign: TextAlign.center,
-                ),
+                child: Text("${snapshot.error}"),
               ),
             ),
           );
@@ -251,14 +227,17 @@ class _StudyRunnerState extends State<StudyRunner> {
 
         final step = _steps[_currentIndex];
 
+        // 🔥 Schrittzähler aktualisieren (richtig!)
+        _ensureCorrectMeasuringStepCounter();
+
         if (_isConfirming) {
           return RepeatScreen(
             onRepeat: _repeatMeasuringStep,
             onNext: _saveAndAdvance,
-            onLeaveStudy: () => _leaveStudy(false),
             stepHeading: step.heading,
             repetition: _repetitionCounter,
             maxRepetition: step.repetitions,
+            onLeaveStudy: () => _leaveStudy(false),
           );
         }
 
@@ -266,68 +245,70 @@ class _StudyRunnerState extends State<StudyRunner> {
           return InstructionScreen(
             heading: step.heading,
             description: step.description,
-            onNext: _nextStep, // Instruction geht direkt weiter
+            onNext: _nextStep,
             onLeaveStudy: () => _leaveStudy(false),
             pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
             debugMode: step.debugMode,
           );
-        } else {
-          if (_showPractice && _repetitionCounter == 1) {
-            return PracticeScreen(
-              practiceInstruction: step.practiceText,
-              onStartMeasurment: () {
-                setState(() {
-                  _showPractice = false;
-                });
-              },
-            );
-          }
-          final date = DateTime.now().toIso8601String().replaceAll(':', '-');
+        }
 
-          final recordingId =
-              "${widget.experimentId}_step${_measuringStepCounter + 1}_${step.heading.replaceAll(' ', '')}_$date";
-
-          return MeasuringScreen(
-            duration: step.duration,
-            actionButton: step.actionButton,
-            debugMode: step.debugMode,
-            logger: _logger,
-            recordingId: recordingId,
-            stepHeading: step.heading,
-            measuringStepCounter: _measuringStepCounter + 1,
-            onStart: () => _startMeasuring(recordingId),
-            onNext: _stopAndConfirm,
-            onLeaveStudy: () => _leaveStudy(true),
-            signalFrame: step.signalFrame,
-            measuringTimes: step.measuringTimes,
-            measuringInstructions: step.measuringInstructions,
-            counterMode: step.counterMode,
-            onActionButtonPressed: () {
-              _logger.logOtherEvent(
-                _measuringStepCounter + 1,
-                step.heading,
-                step.heading,
-                "ActionButton_Pressed",
-              );
-            },
-            onActionButtonReleased: () {
-              _logger.logOtherEvent(
-                _measuringStepCounter + 1,
-                step.heading,
-                step.heading,
-                "ActionButton_Released",
-              );
-            },
-            onSignalFrameChanged: (bool isGreen) {
-              _logger.logOtherEvent(
-                _measuringStepCounter + 1,
-                step.heading,
-                step.heading,
-                isGreen ? "SignalFrame_Start" : "SignalFrame_Stop",
-              );
+        // MEASURING
+        if (_showPractice && _repetitionCounter == 1) {
+          return PracticeScreen(
+            practiceInstruction: step.practiceText,
+            onStartMeasurment: () {
+              setState(() => _showPractice = false);
             },
           );
         }
+
+        final date = DateTime.now().toIso8601String().replaceAll(':', '-');
+
+        final stepFilename = "$_measuringStepCounter.$_repetitionCounter";
+
+        final recordingId =
+            "${widget.experimentId}_step${stepFilename}_${step.heading.replaceAll(" ", "")}_$date";
+
+        return MeasuringScreen(
+          duration: step.duration,
+          actionButton: step.actionButton,
+          debugMode: step.debugMode,
+          logger: _logger,
+          recordingId: recordingId,
+          stepHeading: step.heading,
+          measuringStepCounter: _measuringStepCounter,
+          onStart: () => _startMeasuring(recordingId),
+          onNext: _stopAndConfirm,
+          onLeaveStudy: () => _leaveStudy(true),
+          signalFrame: step.signalFrame,
+          measuringTimes: step.measuringTimes,
+          measuringInstructions: step.measuringInstructions,
+          counterMode: step.counterMode,
+          onActionButtonPressed: () {
+            _logger.logOtherEvent(
+              _measuringStepCounter + 1,
+              step.heading,
+              step.heading,
+              "ActionButton_Pressed",
+            );
+          },
+          onActionButtonReleased: () {
+            _logger.logOtherEvent(
+              _measuringStepCounter + 1,
+              step.heading,
+              step.heading,
+              "ActionButton_Released",
+            );
+          },
+          onSignalFrameChanged: (bool isGreen) {
+            _logger.logOtherEvent(
+              _measuringStepCounter + 1,
+              step.heading,
+              step.heading,
+              isGreen ? "SignalFrame_Start" : "SignalFrame_Stop",
+            );
+          },
+        );
       },
     );
   }
