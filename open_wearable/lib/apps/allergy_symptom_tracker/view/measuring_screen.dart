@@ -267,6 +267,13 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       setState(() {
         _currentCount++;
       });
+    }
+  }
+
+  void _onActionButtonReleased() {
+    widget.onActionButtonReleased?.call();
+
+    if (widget.counterMode) {
       if (_currentCount >= widget.duration) {
         _cancelAndNext();
       }
@@ -382,7 +389,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                                 _onActionButtonPressed();
                               },
                               onPointerUp: (_) {
-                                widget.onActionButtonReleased?.call();
+                                _onActionButtonReleased();
                               },
                               child: ElevatedButton(
                                 onPressed: () {},
