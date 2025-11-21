@@ -74,11 +74,18 @@ List<AppInfo> _apps = [
     logoPath: "lib/apps/allergy_symptom_tracker/assets/logo.png",
     title: "Allergy Symptom Tracker",
     description: "Measure different kind of reactions to allergy symptoms",
-    widget:
-        AllergySymptomTrackerApp(), //fy for easier debugging, correct code is below
-    /*widget: SelectEarableView(startApp: (wearable, sensorConfigProvider) {
-      return StudySelection();
-    },),*/
+    widget: AllergySymptomTrackerApp(),
+
+    /*widget: SelectEarableView(
+      startApp: (wearable, sensorConfigProvider) {
+        return StudySelection(
+          leftWearable: wearable,
+          leftConfigProvider: sensorConfigProvider,
+          rightWearable: wearable,
+          rightConfigProvider: sensorConfigProvider,
+        );
+      },
+    ),*/
   ),
 ];
 
