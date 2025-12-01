@@ -45,6 +45,7 @@ class _StudyRunnerState extends State<StudyRunner> {
   int _currentIndex = 0;
   bool _showPractice = true;
   int _repetitionCounter = 1;
+  String _currentRecordingId = "";
 
   /// Zählt echte Mess-Schritte (1,2,3...)
   int _measuringStepCounter = 0;
@@ -65,7 +66,6 @@ class _StudyRunnerState extends State<StudyRunner> {
     super.initState();
     _steps = widget.protocol.getSteps();
     _logger = ExperimentLogger();
-
     _loadingFuture = _loadConfigAndInitManager();
   }
 
@@ -85,8 +85,19 @@ class _StudyRunnerState extends State<StudyRunner> {
     );
   }
 
-  Future<void> _startMeasuring(String recordingId) async {
+  Future<void> _startMeasuring() async {
+    await _manager.deactivateSensors(); // <-- wichtig
+
+    _ensureCorrectMeasuringStepCounter();
+
     final step = _steps[_currentIndex];
+    final date = DateTime.now().toIso8601String().replaceAll(':', '-');
+    final filename = "$_measuringStepCounter.$_repetitionCounter";
+
+    final recordingId =
+        "${widget.experimentId}_step${filename}_${step.heading.replaceAll(" ", "")}_$date";
+
+    _currentRecordingId = recordingId;
 
     await _logger.startLogging(recordingId, false);
     _logger.logTaskStart(_currentIndex, step.heading, step.duration);
@@ -190,20 +201,25 @@ class _StudyRunnerState extends State<StudyRunner> {
     }
   }
 
-  void _jumpToStep(int index) {
-    if (index >= 0 && index < _steps.length) {
-      setState(() {
-        _currentIndex = index;
-        _repetitionCounter = 1; // Setze Wiederholungszähler zurück
-        _showPractice = true; // Starte ggf. mit Practice-Screen
-        _isConfirming = false; // Beende Bestätigungs-Modus
-        // Optional: _measuringStepCounter und _lastCountedMeasuringIndex
-        // müssen möglicherweise hier auch korrigiert werden,
-        // wenn Sie zu einem früheren Messschritt springen.
-        // Für dieses Beispiel lassen wir es einfach, da _ensureCorrectMeasuringStepCounter
-        // im nächsten Build-Zyklus korrigiert wird.
-      });
-    }
+  void _jumpToStep(int index) async {
+    if (index < 0 || index >= _steps.length) return;
+
+    // Sensoren stoppen falls aktiv
+    await _manager.deactivateSensors();
+
+    setState(() {
+      _currentIndex = index;
+      _repetitionCounter = 1;
+      _showPractice = true;
+      _isConfirming = false;
+
+      /// Critical fix
+      _currentRecordingId = "";
+
+      /// Damit measuringCounter nicht weiterzählt
+      _lastCountedMeasuringIndex = -1;
+      _measuringStepCounter = 0;
+    });
   }
 
   void _ensureCorrectMeasuringStepCounter() {
@@ -292,20 +308,15 @@ class _StudyRunnerState extends State<StudyRunner> {
 
         final date = DateTime.now().toIso8601String().replaceAll(':', '-');
 
-        final stepFilename = "$_measuringStepCounter.$_repetitionCounter";
-
-        final recordingId =
-            "${widget.experimentId}_step${stepFilename}_${step.heading.replaceAll(" ", "")}_$date";
-
         return MeasuringScreen(
           duration: step.duration,
           actionButton: step.actionButton,
           debugMode: step.debugMode,
           logger: _logger,
-          recordingId: recordingId,
+          recordingId: _currentRecordingId,
           stepHeading: step.heading,
           measuringStepCounter: _measuringStepCounter,
-          onStart: () => _startMeasuring(recordingId),
+          onStart: () => _startMeasuring(),
           onNext: _stopAndConfirm,
           onLeaveStudy: () => _leaveStudy(true),
           signalFrame: step.signalFrame,
