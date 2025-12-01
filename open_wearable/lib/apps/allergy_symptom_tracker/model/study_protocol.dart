@@ -27,7 +27,9 @@ class Dataset1Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Rub on the eyes",
-          description: "Rub your eyes with your hands. "
+          description:
+              "For this step, ask the study coordinator to come and help you. "
+              "Rub your eyes with your hands. "
               "Try doing this once with only your right eye, once with only your left eye, and once with both eyes at the same time. "
               "In this recording, there is no action button; the green frame indicates when you should perform the action. "
               "Perform the action throughout the entire green phase. "
@@ -310,9 +312,10 @@ class Dataset2Protocol extends StudyProtocol {
         StudyStep(
           type: StudyStepType.instruction,
           heading: "Rub on the eyes",
-          description: "Rub your eyes with your hands. "
-              "Try doing this once with only your right eye, once with only your left eye, and once with both eyes at the same time. "
-              "In this recording, there is no action button; the green frame indicates when you should perform the action. "
+          description:
+              "For this step, ask the study coordinator to come and help you. "
+              "Rub your ears with your hands. "
+              "Try to do this once with only your left ear, once with only your right ear, and once with both ears at the same time. "
               "Perform the action throughout the entire green phase. "
               "Behave normally during the red phases. \n"
               "Recording Type: Frame indication ",
@@ -498,7 +501,10 @@ class Dataset2Protocol extends StudyProtocol {
           signalFrame: true,
           duration: 62,
           measuringTimes: [5, 5, 4, 5, 3, 5, 4, 5, 2, 5, 4, 5, 3, 5, 4],
-          measuringInstructions: ["get ready to pump", "keep pumping"],
+          measuringInstructions: [
+            "get ready to for saliva pumping",
+            "keep saliva pumping",
+          ],
           repetitions: 3,
           practiceText: "you can now practice the pumping movement",
         ),
