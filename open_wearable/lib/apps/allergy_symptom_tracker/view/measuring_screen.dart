@@ -381,58 +381,65 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                       if (widget.actionButton)
                         Align(
                           alignment: Alignment(0.0, 0.37),
-                          child: SizedBox(
-                            height: 230,
-                            width: 350,
-                            child: Listener(
-                              onPointerDown: (_) {
-                                _onActionButtonPressed();
-                              },
-                              onPointerUp: (_) {
-                                _onActionButtonReleased();
-                              },
-                              child: ElevatedButton(
-                                onPressed: () {},
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                    (Set<WidgetState> states) {
-                                      if (states
-                                          .contains(WidgetState.pressed)) {
-                                        return Colors.green[900]!;
-                                      }
-                                      return Colors.green;
-                                    },
-                                  ),
-                                  foregroundColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                    (Set<WidgetState> states) {
-                                      if (states
-                                          .contains(WidgetState.pressed)) {
-                                        return Colors.green;
-                                      }
-                                      return Colors.white;
-                                    },
-                                  ),
-                                  shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                height: 230,
+                                width: 350,
+                                child: Listener(
+                                  onPointerDown: (_) =>
+                                      _onActionButtonPressed(),
+                                  onPointerUp: (_) => _onActionButtonReleased(),
+                                  child: ElevatedButton(
+                                    onPressed: () {},
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty
+                                          .resolveWith<Color>(
+                                        (states) =>
+                                            states.contains(WidgetState.pressed)
+                                                ? Colors.green[900]!
+                                                : Colors.green,
+                                      ),
+                                      foregroundColor: WidgetStateProperty
+                                          .resolveWith<Color>(
+                                        (states) =>
+                                            states.contains(WidgetState.pressed)
+                                                ? Colors.green
+                                                : Colors.white,
+                                      ),
+                                      shape: MaterialStateProperty.all(
+                                        RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                      ),
+                                      padding: MaterialStateProperty.all(
+                                        const EdgeInsets.symmetric(
+                                            vertical: 20),
+                                      ),
                                     ),
-                                  ),
-                                  padding: MaterialStateProperty.all(
-                                    const EdgeInsets.symmetric(vertical: 20),
-                                  ),
-                                ),
-                                child: const Text(
-                                  "Action",
-                                  style: TextStyle(
-                                    fontSize: 33,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    child: const Text(
+                                      "Action",
+                                      style: TextStyle(
+                                        fontSize: 33,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 8), // kleiner Abstand
+                              const Text(
+                                "press and hold action button",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.black54,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
 
