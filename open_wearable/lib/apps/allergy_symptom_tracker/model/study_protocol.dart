@@ -21,7 +21,7 @@ class Dataset1Protocol extends StudyProtocol {
           duration: 10,
           actionButton: true,
           counterMode: true,
-          repetitions: 3,
+          repetitions: 2,
           practiceText: "You can now practice swallowing",
         ),
         StudyStep(
@@ -71,7 +71,73 @@ class Dataset1Protocol extends StudyProtocol {
             "Get ready to rub both your eyes",
             "Rub both your eyes",
           ],
-          repetitions: 4,
+          repetitions: 2,
+        ),
+        StudyStep(
+          type: StudyStepType.instruction,
+          heading: "Swallowing",
+          description:
+              "During the recording, try to swallow at regular intervals. "
+              "Press and hold the action button during the entire time you are swallowing. \n"
+              "Recording Type: Counter",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          heading: "Swallowing",
+          duration: 10,
+          actionButton: true,
+          counterMode: true,
+          repetitions: 2,
+          practiceText: "You can now practice swallowing",
+        ),
+        StudyStep(
+          type: StudyStepType.instruction,
+          heading: "Rub on the eyes",
+          description:
+              "For this step, ask the study coordinator to come and help you. "
+              "Rub your eyes with your hands. "
+              "Try doing this once with only your right eye, once with only your left eye, and once with both eyes at the same time. "
+              "In this recording, there is no action button; the green frame indicates when you should perform the action. "
+              "Perform the action throughout the entire green phase. "
+              "Behave normally during the red phases. \n"
+              "Recording Type: Frame indication ",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          duration: 83,
+          signalFrame: true,
+          heading: "Rub on the eyes",
+          measuringTimes: [
+            5,
+            5,
+            3,
+            5,
+            4,
+            5,
+            5,
+            5,
+            4,
+            5,
+            3,
+            5,
+            5,
+            5,
+            4,
+            5,
+            3,
+            5,
+            4,
+          ],
+          practiceText: "You can now practice rubbing your eyes",
+          measuringInstructions: [
+            "Get ready to rub your left eye",
+            "Rub your left eye",
+            "Get ready to rub your right eye",
+            "Rub your right eye",
+            "Get ready to rub both your eyes",
+            "Rub both your eyes",
+          ],
+          repetitions: 2,
         ),
         StudyStep(
           type: StudyStepType.instruction,
@@ -88,23 +154,6 @@ class Dataset1Protocol extends StudyProtocol {
           actionButton: true,
           repetitions: 4,
           practiceText: "you can now practice sniffing",
-        ),
-        StudyStep(
-          type: StudyStepType.instruction,
-          heading: "Swallowing",
-          description:
-              "During the recording, try to swallow at regular intervals. "
-              "Press and hold the action button during the entire time you are swallowing. \n"
-              "Recording Type: Counter",
-        ),
-        StudyStep(
-          type: StudyStepType.measuring,
-          heading: "Swallowing",
-          duration: 10,
-          actionButton: true,
-          counterMode: true,
-          repetitions: 3,
-          practiceText: "You can now practice swallowing",
         ),
         StudyStep(
           type: StudyStepType.instruction,
@@ -173,7 +222,7 @@ class Dataset1Protocol extends StudyProtocol {
           duration: 10,
           actionButton: true,
           counterMode: true,
-          repetitions: 3,
+          repetitions: 2,
           practiceText: "You can now practice swallowing",
         ),
         StudyStep(
@@ -217,7 +266,10 @@ class Dataset1Protocol extends StudyProtocol {
           signalFrame: true,
           duration: 62,
           measuringTimes: [5, 5, 4, 5, 3, 5, 4, 5, 2, 5, 4, 5, 3, 5, 4],
-          measuringInstructions: ["get ready to pump", "keep pumping"],
+          measuringInstructions: [
+            "get ready to for saliva pumping",
+            "keep saliva pumping",
+          ],
           repetitions: 3,
           practiceText: "you can now practice the pumping movement",
         ),
@@ -272,7 +324,7 @@ class Dataset2Protocol extends StudyProtocol {
           heading: "Basic tasks",
           description: "The study is divided in to two parts. "
               "In the first part you are going to do normal tasks, beginning with reading something, then watching and in the end eating something. "
-              "Each of these tasks will last for 5 minutes. The signal frame and instructions on the display will lead you through the second half.",
+              "Each of these tasks will last for 5 minutes. The signal frame and instructions on the display will lead you through the recording.",
         ),
         StudyStep(
           type: StudyStepType.measuring,
@@ -306,7 +358,7 @@ class Dataset2Protocol extends StudyProtocol {
           duration: 10,
           actionButton: true,
           counterMode: true,
-          repetitions: 3,
+          repetitions: 2,
           practiceText: "You can now practice swallowing",
         ),
         StudyStep(
@@ -314,8 +366,9 @@ class Dataset2Protocol extends StudyProtocol {
           heading: "Rub on the eyes",
           description:
               "For this step, ask the study coordinator to come and help you. "
-              "Rub your ears with your hands. "
-              "Try to do this once with only your left ear, once with only your right ear, and once with both ears at the same time. "
+              "Rub your eyes with your hands. "
+              "Try doing this once with only your right eye, once with only your left eye, and once with both eyes at the same time. "
+              "In this recording, there is no action button; the green frame indicates when you should perform the action. "
               "Perform the action throughout the entire green phase. "
               "Behave normally during the red phases. \n"
               "Recording Type: Frame indication ",
@@ -355,7 +408,73 @@ class Dataset2Protocol extends StudyProtocol {
             "Get ready to rub both your eyes",
             "Rub both your eyes",
           ],
-          repetitions: 4,
+          repetitions: 2,
+        ),
+        StudyStep(
+          type: StudyStepType.instruction,
+          heading: "Swallowing",
+          description:
+              "During the recording, try to swallow at regular intervals. "
+              "Press and hold the action button during the entire time you are swallowing. \n"
+              "Recording Type: Counter",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          heading: "Swallowing",
+          duration: 10,
+          actionButton: true,
+          counterMode: true,
+          repetitions: 2,
+          practiceText: "You can now practice swallowing",
+        ),
+        StudyStep(
+          type: StudyStepType.instruction,
+          heading: "Rub on the eyes",
+          description:
+              "For this step, ask the study coordinator to come and help you. "
+              "Rub your eyes with your hands. "
+              "Try doing this once with only your right eye, once with only your left eye, and once with both eyes at the same time. "
+              "In this recording, there is no action button; the green frame indicates when you should perform the action. "
+              "Perform the action throughout the entire green phase. "
+              "Behave normally during the red phases. \n"
+              "Recording Type: Frame indication ",
+        ),
+        StudyStep(
+          type: StudyStepType.measuring,
+          duration: 83,
+          signalFrame: true,
+          heading: "Rub on the eyes",
+          measuringTimes: [
+            5,
+            5,
+            3,
+            5,
+            4,
+            5,
+            5,
+            5,
+            4,
+            5,
+            3,
+            5,
+            5,
+            5,
+            4,
+            5,
+            3,
+            5,
+            4,
+          ],
+          practiceText: "You can now practice rubbing your eyes",
+          measuringInstructions: [
+            "Get ready to rub your left eye",
+            "Rub your left eye",
+            "Get ready to rub your right eye",
+            "Rub your right eye",
+            "Get ready to rub both your eyes",
+            "Rub both your eyes",
+          ],
+          repetitions: 2,
         ),
         StudyStep(
           type: StudyStepType.instruction,
@@ -372,23 +491,6 @@ class Dataset2Protocol extends StudyProtocol {
           actionButton: true,
           repetitions: 4,
           practiceText: "you can now practice sniffing",
-        ),
-        StudyStep(
-          type: StudyStepType.instruction,
-          heading: "Swallowing",
-          description:
-              "During the recording, try to swallow at regular intervals. "
-              "Press and hold the action button during the entire time you are swallowing. \n"
-              "Recording Type: Counter",
-        ),
-        StudyStep(
-          type: StudyStepType.measuring,
-          heading: "Swallowing",
-          duration: 10,
-          actionButton: true,
-          counterMode: true,
-          repetitions: 3,
-          practiceText: "You can now practice swallowing",
         ),
         StudyStep(
           type: StudyStepType.instruction,
@@ -457,7 +559,7 @@ class Dataset2Protocol extends StudyProtocol {
           duration: 10,
           actionButton: true,
           counterMode: true,
-          repetitions: 3,
+          repetitions: 2,
           practiceText: "You can now practice swallowing",
         ),
         StudyStep(
