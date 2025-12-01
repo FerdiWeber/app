@@ -342,7 +342,7 @@ class Dataset2Protocol extends StudyProtocol {
           ],
           repetitions: 1,
           practiceText:
-              "Make sure everything is ready. By pressing the button the recording will start",
+              "Make sure everything is ready. By pressing the button, the recording will start.",
         ),
         StudyStep(
           type: StudyStepType.instruction,

@@ -86,7 +86,7 @@ class _StudyRunnerState extends State<StudyRunner> {
   }
 
   Future<void> _startMeasuring() async {
-    await _manager.deactivateSensors(); // <-- wichtig
+    //await _manager.deactivateSensors(); // <-- wichtig
 
     _ensureCorrectMeasuringStepCounter();
 
@@ -316,7 +316,7 @@ class _StudyRunnerState extends State<StudyRunner> {
           recordingId: _currentRecordingId,
           stepHeading: step.heading,
           measuringStepCounter: _measuringStepCounter,
-          onStart: () => _startMeasuring(),
+          onStart: _startMeasuring,
           onNext: _stopAndConfirm,
           onLeaveStudy: () => _leaveStudy(true),
           signalFrame: step.signalFrame,
