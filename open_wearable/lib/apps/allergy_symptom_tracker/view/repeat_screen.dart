@@ -28,7 +28,7 @@ class RepeatScreen extends StatelessWidget {
     bool repetitionsLeft = repetition < maxRepetition;
     int nextRepetition = repetition + 1;
     String continueText = repetitionsLeft
-        ? 'Next Step will be recoring $nextRepetition out of $maxRepetition for  $stepHeading.'
+        ? 'Next Step will be recoring $nextRepetition out of $maxRepetition for  $stepHeading.' //typo recoring -> recording
         : 'You have completed all recording steps for $stepHeading and the study will continue with the next symptom.';
 
     // Gemeinsamer Stil für beide Buttons

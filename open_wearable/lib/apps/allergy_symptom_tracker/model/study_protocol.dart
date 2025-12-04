@@ -190,7 +190,7 @@ class Dataset1Protocol extends StudyProtocol {
           duration: 30,
           actionButton: true,
           heading: "Clearing the throat",
-          practiceText: "you can now practice clearing your throat clearing",
+          practiceText: "you can now practice clearing your throat",
           repetitions: 4,
         ),
         StudyStep(
@@ -286,7 +286,7 @@ class Dataset1Protocol extends StudyProtocol {
           duration: 30,
           actionButton: true,
           heading: "Clearing the throat",
-          practiceText: "you can now practice clearing your throat clearing",
+          practiceText: "you can now practice clearing your throat",
           repetitions: 4,
         ),
         StudyStep(
