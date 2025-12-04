@@ -255,7 +255,7 @@ class Dataset1Protocol extends StudyProtocol {
           type: StudyStepType.instruction,
           heading: "Pumping movement",
           description: "Use your tongue to move saliva over your palate. "
-              "The signal frame around the display indicates when you should perform the pumping movement. "
+              "The signal frame around the display indicates when you should perform the saliva movement. "
               "Perform the action throughout the entire green phase. "
               "Behave normally during the red phases. \n"
               "Recording Type: Frame indication",
@@ -267,8 +267,8 @@ class Dataset1Protocol extends StudyProtocol {
           duration: 62,
           measuringTimes: [5, 5, 4, 5, 3, 5, 4, 5, 2, 5, 4, 5, 3, 5, 4],
           measuringInstructions: [
-            "get ready to for saliva pumping",
-            "keep saliva pumping",
+            "get ready to for saliva movement",
+            "keep performing the movement",
           ],
           repetitions: 3,
           practiceText: "you can now practice the pumping movement",
